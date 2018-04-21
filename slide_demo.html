@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>猎豹游戏</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+
+        html{
+            height: 100%;
+            overflow-x: hidden;
+            font:12px/1 Arial,Helvetica,"Hiragino Sans GB","Microsoft YaHei","WenQuanYi Micro Hei",sans-serif;
+        }
+
+        body{
+            height: 100%;
+            overflow-x: hidden;
+            background-color: #f3f3f3;
+        }
+
+        a{
+            text-decoration: none;
+            color: #000;
+        }
+
+        ul,li{
+            list-style: none;
+        }
+        
+        .main {
+            position: relative;
+            margin: auto;
+            max-width: 768px;
+            background-color: #f2f2f2;
+        }
+
+
+
+        .game-detail-img-list{
+            position: absolute;
+            top:0;
+            left: 0;
+            -padding:10px 0;
+            -webkit-transition:left .5s linear;
+        }
+        
+        .game-detail-img-list li{
+            float: left;
+            margin-right: 5px;
+        }
+
+        .game-detail-img-list li a{
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .game-detail-img-list li img{
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .game-detail-focus{
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+        }
+
+        .game-detail-focus li{
+            float: left;
+            width: 10px;
+            height: 10px;
+            background-color: #fff;
+            border-radius: 10px;
+            margin-left: 5px;
+        }
+
+        .game-detail-focus li.active{
+            background-color: red;
+        }
+    
+        .game-detail-ul-wrap{
+            width: 90%;
+            margin: 0 auto 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-detail-placeholder{
+            display:block;
+            height:0;
+            padding-top:85%;
+        }
+
+        .game-page-icon{
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            top: 50%;
+            margin-top: -22.5px;
+            z-index: 100;
+        }
+
+        .game-detail-next{
+            display: none;
+            right: 7%;
+            background:url('img/page_icon.png') no-repeat 0 0;
+            background-size: contain;
+        }
+
+        .game-detail-next.active,.game-detail-prev.active{
+            display: block;
+        }
+
+        .game-detail-prev{
+            display: none;
+            left: 6%;
+            -webkit-transform:rotate(180deg);
+            background:url('img/page_icon.png') no-repeat 0 0;
+            background-size: contain;
+        }
+            
+
+
+    </style>
+</head>
+<body>
+    <div class="main" id="main">
+        <div class="game-detail-wrap" id="game-detail-wrap">
+           
+        </div>
+    </div>
+    <script type="text/template" id="game-detail-template">
+        <div class="game-detail-content">
+            <div class="game-detail-img-wrap">
+                <span class="game-page-icon game-detail-prev" id="game-detail-prev"></span>
+                <span class="game-page-icon game-detail-next active" id="game-detail-next"></span>
+                <div id="game-detail-ul-wrap" class="game-detail-ul-wrap">
+                    <span class="game-detail-placeholder"</span>
+                    <ul id="game-detail-img-list" class="game-detail-img-list">
+                    </ul>
+                    <ol id="game-detail-focus" class="game-detail-focus">
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script>
+/*工具方法*/
+        
+        function getDocWidth() {
+            var D = document;
+            return Math.max(
+                Math.max(D.body.scrollWidth, D.documentElement.scrollWidth),
+                Math.max(D.body.offsetWidth, D.documentElement.offsetWidth),
+                Math.max(D.body.clientWidth, D.documentElement.clientWidth)
+            );
+        }
+
+        function getById(id){
+            return document.getElementById(id);
+        }
+
+        function setStyle(obj,pro,val){
+            obj.style[pro] = val;
+        }
+
+        function whichTransitionEvent(){   
+            var t;   
+            var el = document.createElement('fakeelement');   
+            var transitions = {'transition':'transitionend','OTransition':'oTransitionEnd','MozTransition':'transitionend','WebkitTransition':'webkitTransitionEnd'};
+            for(t in transitions){       
+                if( el.style[t] !== undefined ){           
+                    return transitions[t];       
+                }   
+            }            
+        }
+
+        var raf = (function(){
+            return  window.requestAnimationFrame || function(fn){setTimeout(fn,16)};
+        })();
+
+        var cancelraf = (function () {
+            return window.cancelAnimationFrame || window.webkitCancelAnimationFrame || function (id) {
+                window.clearTimeout(id);
+            };
+        })();
+
+/*工具方法*/
+
+/*
+数据
+*/
+        //var test;//testhahhha
+
+        var gameData = {
+            "detail_img":
+            [
+            "img/111.jpg",
+            "img/222.jpg",
+            "img/333.jpg",
+            "img/444.jpg"
+            //"img/555.jpg",
+            //"img/666.jpg",
+            //"img/777.jpg"
+            ]
+
+        };
+        
+
+        var gameDetailWrap = getById('game-detail-wrap');
+        var getTemplateData = getById('game-detail-template').innerHTML;
+        gameDetailWrap.innerHTML = getTemplateData;
+
+        var gameDetailImgList = getById('game-detail-img-list');
+        var gameDetailUlWrap = getById('game-detail-ul-wrap');
+        var screenWidth = getDocWidth();
+        var gf = document.createDocumentFragment();
+        var liData = gameData.detail_img;
+        var liDataLen = liData.length;
+        for(var i=0;i<liDataLen;i++){
+            var oLi = document.createElement('li');
+            oLi.style.width = gameDetailUlWrap.offsetWidth*0.5 -5 + 'px';
+            var oImg = document.createElement('img');
+            oImg.src = liData[i];
+            oLi.appendChild(oImg);
+            gf.appendChild(oLi);
+        }
+        gameDetailImgList.appendChild(gf);
+        var liWidth = gameDetailImgList.getElementsByTagName('li')[0].offsetWidth + 5;
+        gameDetailImgList.style.width = liWidth*liDataLen + 'px';
+
+        window.addEventListener('resize',function(){
+            for(var j=0;j<liDataLen;j++){
+                gameDetailImgList.getElementsByTagName('li')[j].style.width = gameDetailUlWrap.offsetWidth*0.5 -5 + 'px';
+            }
+           
+            liWidth = gameDetailImgList.getElementsByTagName('li')[0].offsetWidth + 5;
+            gameDetailImgList.style.width = liWidth*liDataLen + 'px';  
+            gameDetailImgList.style.left = -liWidth*num + 'px';
+        },false);
+
+        var gameDetailNext = getById('game-detail-next');
+        var gameDetailPrev = getById('game-detail-prev');
+        var prevOriginalClass = 'game-page-icon game-detail-prev';
+        var prevActiveClass = 'game-page-icon game-detail-prev active';
+        var nextOriginalClass = 'game-page-icon game-detail-next';
+        var nextActiveClass = 'game-page-icon game-detail-next active';
+
+        var num = 0;
+
+        function toggleClass(){
+            gameDetailPrev.className = num == 0?prevOriginalClass:prevActiveClass;
+            gameDetailNext.className = num == (liDataLen-2)?nextOriginalClass:nextActiveClass;
+        }
+       
+        gameDetailNext.addEventListener('touchstart',function(){
+            if(num == liDataLen - 2){
+                return;
+            }
+            num++;
+            toggleClass();
+            gameDetailImgList.style.left = -liWidth*num + 'px';
+            
+        },false);
+
+        gameDetailPrev.addEventListener('touchstart',function(){
+            if(num == 0){
+                return;
+            }
+            num--;
+            toggleClass();
+            gameDetailImgList.style.left = -liWidth*num + 'px';
+            
+        },false);
+
+        
+        
+
+        
+
+
+
+
+
+
+
+    </script>
+    
+</body>
+</html>

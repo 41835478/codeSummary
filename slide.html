@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>猎豹游戏</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+
+        html{
+            height: 100%;
+            overflow-x: hidden;
+            font:12px/1 Arial,Helvetica,"Hiragino Sans GB","Microsoft YaHei","WenQuanYi Micro Hei",sans-serif;
+        }
+
+        body{
+            height: 100%;
+            overflow-x: hidden;
+            background-color: #f3f3f3;
+        }
+
+        a{
+            text-decoration: none;
+            color: #000;
+        }
+
+        ul,li{
+            list-style: none;
+        }
+        
+        .main {
+            position: relative;
+            margin: auto;
+            max-width: 768px;
+            background-color: #f2f2f2;
+        }
+
+
+
+        .game-detail-img-list{
+            position: absolute;
+            top:0;
+            left: 0;
+            -padding:10px 0;
+            -webkit-transition:left .5s linear;
+        }
+        
+        .game-detail-img-list li{
+            float: left;
+            margin-right: 5px;
+        }
+
+        .game-detail-img-list li a{
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .game-detail-img-list li img{
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .game-detail-focus{
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+        }
+
+        .game-detail-focus li{
+            float: left;
+            width: 10px;
+            height: 10px;
+            background-color: #fff;
+            border-radius: 10px;
+            margin-left: 5px;
+        }
+
+        .game-detail-focus li.active{
+            background-color: red;
+        }
+    
+        .game-detail-ul-wrap{
+            width: 90%;
+            margin: 0 auto 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-detail-placeholder{
+            display:block;
+            height:0;
+            padding-top:85%;
+        }
+
+        .game-page-icon{
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            top: 50%;
+            margin-top: -22.5px;
+            z-index: 100;
+        }
+
+        .game-detail-next{
+            display: none;
+            right: 7%;
+            background:url('img/page_icon.png') no-repeat 0 0;
+            background-size: contain;
+        }
+
+        .game-detail-next.active,.game-detail-prev.active{
+            display: block;
+        }
+
+        .game-detail-prev{
+            display: none;
+            left: 6%;
+            -webkit-transform:rotate(180deg);
+            background:url('img/page_icon.png') no-repeat 0 0;
+            background-size: contain;
+        }
+            
+
+
+    </style>
+</head>
+<body>
+    <div class="main" id="main">
+        <div class="game-detail-wrap" id="game-detail-wrap">
+           
+        </div>
+    </div>
+    <script type="text/template" id="game-detail-template">
+        <div class="game-detail-content">
+            <div class="game-detail-img-wrap">
+                <span class="game-page-icon game-detail-prev" id="game-detail-prev"></span>
+                <span class="game-page-icon game-detail-next active" id="game-detail-next"></span>
+                <div id="game-detail-ul-wrap" class="game-detail-ul-wrap">
+                    <span class="game-detail-placeholder"</span>
+                    <ul id="game-detail-img-list" class="game-detail-img-list">
+                    </ul>
+                    <ol id="game-detail-focus" class="game-detail-focus">
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script>
+/*工具方法*/
+        
+        function getDocWidth() {
+            var D = document;
+            return Math.max(
+                Math.max(D.body.scrollWidth, D.documentElement.scrollWidth),
+                Math.max(D.body.offsetWidth, D.documentElement.offsetWidth),
+                Math.max(D.body.clientWidth, D.documentElement.clientWidth)
+            );
+        }
+
+        function getById(id){
+            return document.getElementById(id);
+        }
+
+        function setStyle(obj,pro,val){
+            obj.style[pro] = val;
+        }
+
+        function whichTransitionEvent(){   
+            var t;   
+            var el = document.createElement('fakeelement');   
+            var transitions = {'transition':'transitionend','OTransition':'oTransitionEnd','MozTransition':'transitionend','WebkitTransition':'webkitTransitionEnd'};
+            for(t in transitions){       
+                if( el.style[t] !== undefined ){           
+                    return transitions[t];       
+                }   
+            }            
+        }
+
+        var raf = (function(){
+            return  window.requestAnimationFrame || function(fn){setTimeout(fn,16)};
+        })();
+
+        var cancelraf = (function () {
+            return window.cancelAnimationFrame || window.webkitCancelAnimationFrame || function (id) {
+                window.clearTimeout(id);
+            };
+        })();
+
+/*工具方法*/
+
+/*
+数据
+*/
+        
+
+        
+
+        /*需要扩展
+
+            1，手动滑动
+            3,一页1，2，3个怎么办【解决】
+            4，翻页不是走一个 走一页怎么办【已解决】
+            5,banner可点击
+            6，自动滑动
+            7,左到右右到左上到下下到上
+            【都用json配置，走后台】
+            8，是否无缝轮播
+            9，滑动+自动
+            10，焦点
+            11，resize
+            12,不走图 慢慢走
+            2，star【额外的】
+
+        需要扩展*/
+
+        /*
+            slideNum  走动的个数【配置】
+            singleNum 每页的个数【配置】
+            pageNum   页数      【算的】
+            flowNum   走动的个数【算的】
+
+            
+        */
+
+        var gameData = {
+            "detail_img":
+            [
+            "img/111.jpg",
+            "img/222.jpg",
+            "img/333.jpg",
+            "img/444.jpg",
+            "img/555.jpg",
+            "img/666.jpg"
+            ] 
+
+        };
+
+        /*
+            当singleNum == slideNum时，走得是页数   
+            当singleNum >  slideNum时，走得是1个 slideNum要设置为1
+            //无限loop 22有问题
+        */
+        var config = {
+            conf:gameData,//请求的地址
+            autoPlay:true,//是否自动轮播
+            stoptime:1,//单位是秒,停顿时间
+            dir:"lefttoright",//方向
+            singleNum:2,//一页的个数
+            slideNum:2,//走动的个数[要<=singleNum]
+            clickable:false,//banner是否可点击 
+            target:['http://www.baidu.com','http://www.cmcm.com','http://www.qq.com','http://www.sina.com.cn'],//跳转的地址
+            newTab:false,
+            touchable:false,//是否可以滑动
+            loop:false,//是否无缝轮播
+            focus:false
+        };
+        
+        var bindMove = true;
+        function slide(config){
+            var gameDetailWrap = getById('game-detail-wrap');
+            var getTemplateData = getById('game-detail-template').innerHTML;
+            gameDetailWrap.innerHTML = getTemplateData;
+
+            var gameDetailImgList = getById('game-detail-img-list');
+            var gameDetailUlWrap = getById('game-detail-ul-wrap');
+            var gameDetailFocus = getById('game-detail-focus');
+            var screenWidth = getDocWidth();
+            var gf = document.createDocumentFragment();
+            var gf2 = document.createDocumentFragment();
+            var liData = config.conf.detail_img;
+            var liDataLen = liData.length;
+
+            var target = config.singleNum;//多少为一组
+            var remainNum = liDataLen%target;
+            var integerNum = parseInt(liDataLen/target);
+            var pageNum;
+
+            if(remainNum!=0){
+               pageNum = integerNum+1;
+            }else{
+               pageNum = integerNum;
+            }
+
+
+            var ratioNum = 1/config.singleNum;
+            
+            for(var i=0;i<liDataLen;i++){
+                var oItemA = document.createElement('a');
+                if(config.clickable&&config.target&&(config.target.length>0)){
+                    var tL = config.target.length;
+                    oItemA.href = config.target[i];
+                }
+                if(config.newTab){
+                    oItemA.target = '_blank';
+                }
+                var oLi = document.createElement('li');
+                if(config.focus&&(config.singleNum==1&&config.slideNum==1)){
+                    var oFLi = document.createElement('li');
+                    if(i==0){
+                        oFLi.className = 'active';
+                    }
+                    gf2.appendChild(oFLi);
+                }
+
+                oLi.style.width = parseInt(gameDetailUlWrap.offsetWidth*(ratioNum)) -5 + 'px';
+                oLi.style.height = parseInt(gameDetailUlWrap.offsetHeight) + 'px';
+                
+                var oImg = document.createElement('img');
+                oImg.src = liData[i];
+                oItemA.appendChild(oImg);
+                oLi.appendChild(oItemA);
+                gf.appendChild(oLi);
+               
+            }
+            gameDetailImgList.appendChild(gf);
+            gameDetailFocus.appendChild(gf2);
+
+            var liWidth = gameDetailImgList.getElementsByTagName('li')[0].offsetWidth + 5;
+            var oLiFs = gameDetailFocus.getElementsByTagName('li');
+            gameDetailImgList.style.width = liWidth*liDataLen + 'px';//ul的宽度
+            gameDetailUlWrap.style.width = config.singleNum*(liWidth) + 'px';//ul外容器的宽度
+
+            // window.addEventListener('resize',function(){//解决横竖屏
+            //     for(var j=0;j<liDataLen;j++){
+            //         gameDetailImgList.getElementsByTagName('li')[j].style.width = gameDetailUlWrap.offsetWidth*0.5 -5 + 'px';
+            //     }
+               
+            //     liWidth = gameDetailImgList.getElementsByTagName('li')[0].offsetWidth + 5;
+            //     gameDetailImgList.style.width = liWidth*liDataLen + 'px';  
+            //     gameDetailImgList.style.left = -liWidth*num + 'px';
+            // },false);
+
+            var gameDetailNext = getById('game-detail-next');
+            var gameDetailPrev = getById('game-detail-prev');
+            var prevOriginalClass = 'game-page-icon game-detail-prev';
+            var prevActiveClass = 'game-page-icon game-detail-prev active';
+            var nextOriginalClass = 'game-page-icon game-detail-next';
+            var nextActiveClass = 'game-page-icon game-detail-next active';
+
+            var flowNum = 0;
+            var countNum = 0;
+            var singleNumBol = false;
+
+            
+
+            function toggleClass(bol){
+                gameDetailPrev.className = flowNum == 0?prevOriginalClass:prevActiveClass;
+                if(bol){//单个走
+                    gameDetailNext.className = 
+                    (gameDetailImgList.offsetLeft == (-(liDataLen-config.singleNum)*liWidth))
+                    ?nextOriginalClass:nextActiveClass;
+                }else{//走页数
+                    gameDetailNext.className = (countNum >= (pageNum-1))?nextOriginalClass:nextActiveClass;
+                }
+            }
+            
+            
+            gameDetailNext.addEventListener('touchstart',function(){
+                if(bindMove){
+                    if(config.slideNum < config.singleNum){//单个走
+                        singleNumBol = true;
+                        flowNum++;
+                    }else if(config.slideNum == config.singleNum){//走页数
+                        countNum++;
+                        flowNum += config.slideNum;
+                    }
+
+                    gameDetailImgList.style.left = -liWidth*flowNum + 'px';
+                    bindMove = false;
+                }
+            },false);
+
+            gameDetailPrev.addEventListener('touchstart',function(){
+                if(bindMove){
+                    if(config.slideNum < config.singleNum){
+                        singleNumBol = true
+                        flowNum--;
+                    }else if(config.slideNum == config.singleNum){
+                        countNum--;
+                        flowNum -= config.slideNum;
+                    }
+
+                    gameDetailImgList.style.left = -liWidth*flowNum + 'px';
+                    bindMove = false;
+                }
+            },false);
+
+            /*自动播放*/
+            if(config.autoPlay){
+                setStyle(gameDetailNext,'display','none');
+                setStyle(gameDetailPrev,'display','none');
+            
+                if(config.loop){
+                    gameDetailImgList.innerHTML += gameDetailImgList.innerHTML;
+                    var loopLiLen = gameDetailImgList.getElementsByTagName('li').length;
+                    gameDetailImgList.style.width = liWidth*loopLiLen + 'px';
+                }
+
+                function slideFn(){
+                    if(config.loop){
+                        if(config.slideNum == config.singleNum){
+                            raf(function(){
+                                var ulLeft = gameDetailImgList.offsetLeft;
+                                if(ulLeft <= -gameDetailImgList.offsetWidth/2){
+                                    flowNum = 0;
+                                    gameDetailImgList.style.left = 0 +'px';
+                                    gameDetailImgList.style.webkitTransition = 'none';
+                                    slideFn();
+                                }else{
+                                    flowNum += config.slideNum;
+                                    gameDetailImgList.style.left = -liWidth*flowNum + 'px';
+                                    gameDetailImgList.style.webkitTransition = '';
+                                    raf(function(){
+                                        setTimeout(slideFn,config.stoptime*1000);
+                                    });
+
+                                    if(config.loop&&config.focus&&(config.singleNum==1&&config.slideNum==1)){
+                                        for(var i=0;i<oLiFs.length;i++){
+                                            oLiFs[i].className = '';
+                                        }
+                                        if(flowNum == liDataLen){
+                                            flowNum = 0;
+                                        }
+                                        oLiFs[flowNum].className = 'active';
+                                    }
+                                }
+                                
+
+                                
+
+                            });
+                        }else if(config.slideNum < config.singleNum){
+                            raf(function(){
+                                var ulLeft = gameDetailImgList.offsetLeft;
+                                if(ulLeft <= -gameDetailImgList.offsetWidth/2){
+                                    flowNum = 0;
+                                    gameDetailImgList.style.left = 0 +'px';
+                                    gameDetailImgList.style.webkitTransition = 'none';
+                                    slideFn();
+                                }else{
+                                    flowNum++;
+                                    gameDetailImgList.style.left = -liWidth*flowNum + 'px';
+                                    gameDetailImgList.style.webkitTransition = '';
+                                    raf(function(){
+                                        setTimeout(slideFn,config.stoptime*1000);
+                                    });
+                                }
+
+                            });
+                        }
+                    }else{
+                        raf(function(){
+                            if(config.slideNum < config.singleNum){//单个走
+                                if(flowNum == liDataLen-config.singleNum){
+                                    gameDetailImgList.style.left = 0 + 'px';
+                                    flowNum = 0;
+                                }else{
+                                    flowNum++;
+                                    gameDetailImgList.style.left = -liWidth*flowNum + 'px';
+                                    
+                                }
+
+                            }else if(config.slideNum == config.singleNum){//走页数
+                            
+                                if(flowNum >= liDataLen-config.singleNum){//9个图
+                                    gameDetailImgList.style.left = 0 + 'px';
+                                    flowNum = 0;
+                                }else{
+                                    flowNum += config.slideNum;
+                                    gameDetailImgList.style.left = -liWidth*flowNum + 'px';
+                                    
+                                }
+
+                                if(config.focus&&(config.singleNum==1&&config.slideNum==1)){
+                                    for(var i=0;i<oLiFs.length;i++){
+                                        oLiFs[i].className = '';
+                                    }
+                                    oLiFs[flowNum].className = 'active';
+                                }
+
+                                raf(function(){
+                                    setTimeout(slideFn,config.stoptime*1000);
+                                });
+                            }
+                        });
+                    }
+                }
+
+                setTimeout(slideFn,config.stoptime*1000);
+            }
+
+            /*自动播放*/
+
+
+            var transitionEvent = whichTransitionEvent();transitionEvent && gameDetailImgList.addEventListener(transitionEvent, function(){
+                bindMove = true;
+                toggleClass(singleNumBol);
+            });
+        }
+
+        slide(config);
+
+        
+
+        
+
+
+
+
+
+
+
+    </script>
+    
+</body>
+</html>
