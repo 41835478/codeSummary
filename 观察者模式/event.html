@@ -1,0 +1,104 @@
+<html>
+<head>
+	<title></title>
+	<meta charset="utf-8">
+</head>
+<body>
+
+</body>
+<script type="text/javascript">
+
+	/*
+* 组件开发者A定义组件 Person 供开发者B使用
+*/
+var events = {
+	
+	/*
+	* 添加 name 对应的 事件callback，保存在this._events里
+	*/
+	on: function( name, callback ){
+		this._events || (this._events = {});	//确保this._events存在
+		this._events[name] = this._events[name] || [];//确保this._events[name]存在
+		this._events[name].push({ callback: callback });//将callback 添加到 this._events[name] 内
+	},
+	
+	/*
+	* 执行已经保存在this._events里的 name 对应的事件
+	*/
+	trigger : function( name ){
+		var args = Array.prototype.slice.call( arguments, 1 );		
+                 //将参数中除 name 外的其它参数取出来
+		if( this._events && this._events[name] ){					              //确保 this._events[name] 存在
+			for( var i = 0; i < this._events[name].length; i++){	
+                                //循环执行里面的callback
+				this._events[name][i].callback.apply( this, args );	
+                                //将步骤一取出的值作用callback的参数
+			}
+		}
+	},
+	
+	/*
+	* 删除this._events里 name 对应的事件
+	*/
+	off: function( name ){
+		if( this._events ){
+			delete this._events[name];							//删除  this._events[name]
+		}
+	}
+}
+
+	var Person = function( config ){
+		this.name = config.name;
+		this.age = config.age;
+	}
+
+	for( var key in events ){
+		Person.prototype[key] = events[key];		
+	    //将events里的属性添加到Person的原型里
+	}
+
+	Person.prototype.getName = function(){
+		this.trigger('getName', this.name );
+		return this.name;
+	}
+	/*
+	* 当设置Person里的名字里，执行一次 setName 监听
+	*/
+	Person.prototype.setName = function( name ){
+		this.trigger( 'setName', name );
+		this.name = name;
+		return this;
+	}
+
+	/*
+	* 生成一个实例
+	*/
+	var lulu = new Person({ name: 'lulu', age: '25'});
+
+	/*
+	* 根据业务的个性化需要 添加一个监听事件，当执行到setName里，执行function，
+	*/
+	lulu.on( 'setName', function( name ){
+		console.log('您执行一次setName __ ' + name );
+		/*
+		* 上面一个无意义的场景
+		* 实际的场景可以是setName后会通过 ajax 保存到数据库等操作
+		*/
+	});
+
+	/*
+	* 对同一个监听行为可以添加多个 事件
+	*/
+	lulu.on( 'setName', function( name ){
+		console.log('您执行二次setName __ ' + name )
+	});
+
+	/*
+	* 测试
+	*/
+	lulu.setName('nana');		//控制台会输出	您执行一次setName __ nana;	您执行二次setName __ nana;
+	lulu.setName('aobama');		//您执行一次setName __ aobama;	您执行二次setName __ aobama;
+	lulu.off( 'setName' );
+	lulu.setName('lala');		//此时控制台将不会再输出信息
+</script>
+</html>

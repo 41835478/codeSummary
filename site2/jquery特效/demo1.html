@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title></title>
+    <script src='../js/jquery.js'></script>
+    <style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+    
+    .lp-proCard {
+        border: 1px solid #d4d4d4;
+    }
+    
+    .lp-proCard a {
+        display: block;
+        position: relative;
+        color: #dd6e4c;
+        height: 200px;
+        color: #ED5565;
+        text-decoration: none;
+        -webkit-transition: all .2s ease-out;
+        -moz-transition: all .2s ease-out;
+        transition: all .2s ease-out;
+    }
+    
+    
+    .lp-proCard .line {
+        z-index: 2;
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: #FF7C54;
+        transition-timing-function: linear;
+        -webikt-transition-timing-function: linear;
+        transition-timing-function: linear;
+        transition-timing-function: linear;
+    }
+    
+    .lp-proCard .before-line1 {
+        left: 370px;
+        top: -1px;
+    }
+    
+    .lp-proCard .before-line2 {
+        left: -1px;
+        top: 0px;
+        display: none;
+    }
+    
+    .lp-proCard .before-line3 {
+        left: -1px;
+        top: 200px;
+        display: none;
+    }
+    
+    .lp-proCard .after-line1 {
+        left: 369px;
+        top: 200px;
+    }
+    
+    .lp-proCard .after-line2 {
+        right: -1px;
+        top: 200px;
+        display: none;
+    }
+    
+    .lp-proCard .after-line3 {
+        right: -1px;
+        top: -1px;
+        display: none;
+    }
+    </style>
+</head>
+
+<body>
+    <div class="lp-proCard">
+        <a href="" target="_blank">
+            <div class="before-line1 line" style=""></div>
+            <div class="before-line2 line" style=""></div>
+            <div class="before-line3 line" style=""></div>
+            <div class="after-line1 line" style=""></div>
+            <div class="after-line2 line" style=""></div>
+            <div class="after-line3 line" style=""></div>
+        </a>
+    </div>
+</body>
+<script>
+$(function() {
+
+
+
+    $(".lp-proCard .line").hide();
+    var t1, t2;
+    $(".lp-proCard").hover(function() {
+        $(".lp-proCard .before-line1,.lp-proCard .after-line1").show();
+        $(".lp-proCard .before-line1").stop().animate({
+            "width": 371 + 'px',
+            left: -1 + 'px'
+        }, 300);
+        $(".lp-proCard .after-line1").stop().animate({
+            "width": 370 + 'px',
+            left: 369 + 'px'
+        }, 300);
+
+        clearTimeout(t1);
+        clearTimeout(t2);
+        t1 = setTimeout(function() {
+            $(".lp-proCard .before-line2").show();
+            $(".lp-proCard .after-line2").show();
+            $(".lp-proCard .before-line2").stop().animate({
+                "height": 200 + 'px'
+            }, 300);
+            $(".lp-proCard .after-line2").stop().animate({
+                "height": 200 + 'px',
+                'top': 0 + 'px'
+            }, 300);
+
+        }, 300);
+        t2 = setTimeout(function() {
+            $(".lp-proCard .before-line3").show();
+            $(".lp-proCard .after-line3").show();
+            $(".lp-proCard .before-line3").stop().animate({
+                "width": 370 + 'px'
+            }, 400);
+            $(".lp-proCard .after-line3").stop().animate({
+                "width": 370 + 'px'
+            }, 400);
+
+        }, 600);
+    }, function() {
+
+        clearTimeout(t1);
+        clearTimeout(t2);
+        $(".lp-proCard .before-line1").stop().animate({
+            "width": 0,
+            left: 369 + 'px'
+        });
+        $(".lp-proCard .before-line2").stop().animate({
+            "height": 0
+        });
+        $(".lp-proCard .before-line3").stop().animate({
+            "width": 0
+        });
+        $(".lp-proCard .after-line1").stop().animate({
+            "width": 0,
+            left: 369 + 'px'
+        });
+        $(".lp-proCard .after-line2").stop().animate({
+            "height": 0,
+            top: 200 + 'px'
+        });
+        $(".lp-proCard .after-line3").stop().animate({
+            "width": 0
+        });
+
+    });
+
+
+});
+</script>
+
+</html>

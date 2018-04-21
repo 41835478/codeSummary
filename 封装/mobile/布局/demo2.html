@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>
+	<title></title>
+	<style>
+		*{
+			margin: 0;
+			padding: 0;
+			border: 0;
+		}
+
+		html{
+			font-size: 62.5%;
+		}
+
+		
+		.demo,.wrap{
+			display: flex;
+		}
+
+		.left,.cl{
+			width: 40%;
+		}
+
+		.left img{
+			display: block;
+			width: 100%;
+			max-width: 200px;
+		}
+
+		.right{
+			font-size: 1.6rem;
+		}
+
+		.right,.cr{
+			flex-grow:1;
+			display: flex;
+			justify-content: space-around;
+			align-items: flex-start;
+			flex-flow: column wrap;
+		}
+
+		.cl_1{
+			display: block;
+			width: 50px;
+		}
+
+		.cl_2{
+			display: block;
+			width: 20px;
+		}
+
+		@media screen and (min-device-width :375px){
+		    html{
+		    	font-size: 65.5%;
+		    }
+		}
+
+		@media screen and (min-device-width :768px){
+		    html{
+		    	font-size: 75.5%;
+		    }
+		}
+
+		@media screen and (min-device-width :1024px){
+		    html{
+		    	font-size: 95.5%;
+		    }
+		}
+
+	</style>
+</head>
+<body>
+	<div class="demo">
+		<div class="left">
+			<img src="img/1.jpg">
+		</div>
+		<div class="right">
+			<h2>title</h2>
+			<div class="wrap">
+				<div class="cl">
+					<img src="img/1.jpg" class="cl_1">
+					<img src="img/1.jpg" class="cl_2">
+				</div>
+				<div class="cr">
+					<h2>123213</h2>
+					<h3>asdfsdfdsf</h3>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8"> 
+</head>
+<body>
+
+</body>
+</html>
+<script type="text/javascript">
+
+function Event(type){
+    this.type = type;
+    this.defaultPrevented = false;
+    this.target = null;
+}
+Event.prototype.preventDefault = function(){
+    this.defaultPrevented = true;
+};
+
+function EventTarget(){
+    this.__listeners = Object.create(null);
+}
+
+
+EventTarget.prototype.on = function(ev, fn){
+    (
+        this.__listeners[ev] ||
+        (this.__listeners[ev] = [])
+    ).push(fn);
+};
+EventTarget.prototype.off = function(ev, fn){
+    var listeners = this.__listeners;
+    if(ev){
+        if(listeners[ev]){
+            if(fn){
+                var arr = listeners[ev];
+                for(var i=arr.length - 1;i>-1;--i){
+                    var item = arr[i];
+                    if(item === fn){
+                        arr.splice(i, 1);
+                    }else if(item.hasOwnProperty('__once') && item.__once === fn){
+                        delete item.__once;
+                        arr.splice(i, 1);
+                    }
+                }
+            }else{
+                listeners[ev].length = 0;
+                delete listeners[ev];
+            }
+        }
+    }else{
+        for(var j in listeners){
+            listeners[j].length = 0;
+            delete listeners[j];
+        }
+    }
+};
+var slice = Function.prototype.call.bind(Array.prototype.slice);
+EventTarget.prototype.trigger = function(ev){
+    var arr;
+    var eventType;
+    var event;
+    if(typeof ev === 'string'){
+        eventType = ev;
+    }else{
+        eventType = ev.type;
+        event = ev;
+    }
+    if(arguments.length ===0 || !(arr = this.__listeners[eventType])){
+        return true;
+    }
+    if(!event){
+        event = new Event(eventType);
+    }
+    event.target = event.target || this;
+    var args = slice(arguments, 1);
+    args.unshift(event);
+    var len = arr.length;
+    var _arr = arr.slice();
+    for(var i=0;i<len;++i){
+        if(_arr[i].apply(this, args)){
+            event.preventDefault();
+        }
+    }
+    return !event.defaultPrevented;
+};
+EventTarget.prototype.once = function(ev, fn){
+    var that = this;
+    function onEvent(){
+        delete onEvent.__once;
+        that.off(ev, onEvent);
+        fn.apply(that, arguments);
+    }
+    onEvent.__once = fn;
+    that.on(ev, onEvent);
+};
+
+var demo = new EventTarget();
+
+function show(){
+    demo.trigger('show');
+}
+
+
+function showfn1(){
+    console.log('show的第一次')
+}
+
+function showfn2(){
+    console.log('show的第二次')
+}
+
+
+
+demo.on('show',showfn1);
+demo.on('show',showfn2);
+
+show();//调用必须放在监听的后面
+
+
+
+
+
+
+
+
+
+
+</script>

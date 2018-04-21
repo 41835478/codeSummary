@@ -1,0 +1,30 @@
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		*{
+			margin: 0;
+			padding:0;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="cav"></canvas>
+	<script type="text/javascript">
+		var p = document.getElementById('cav');
+		var t = p.getContext('2d');
+		//t.fillStyle = '#00ff00';
+		//t.fillRect('100','100','50','100');
+
+		//t.strokeStyle = 'pink';
+		//t.strokeRect('30','40','100','100');
+		t.shadowColor = 'red';
+		t.shadowBlur = 100;
+		t.shadowOffsetX = 20;
+		t.shadowOffsetY = 20;
+		t.fillStyle = 'green';
+		t.fillRect('20','20','50','80');
+		
+	</script>
+</body>
+</html>

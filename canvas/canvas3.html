@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<meta charset="utf-8">
+	<style type="text/css">
+		*{
+			margin: 0;
+			padding: 0;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="cas" width="600" height="600"></canvas>
+	<script type="text/javascript">
+		window.onload = function(){
+			var a = document.getElementById('cas');
+			var b = a.getContext('2d');
+			/*
+				startX	渐变的开始圆的 x 坐标
+				startY	渐变的开始圆的 y 坐标
+				startR	开始圆的半径
+				endX	渐变的结束圆的 x 坐标
+				endY	渐变的结束圆的 y 坐标
+				endR	结束圆的半径
+			*/
+
+			var obj = {
+				'startX':200,
+				'startY':200,
+				'startR':30,
+				'endX':400,
+				'endY':400,
+				'endR':300
+			}
+			var c = b.createRadialGradient(
+				obj.startX,
+				obj.startY,
+				obj.startR,
+				obj.endX,
+				obj.endY,
+				obj.endR
+			);
+			c.addColorStop(0,'red');
+			c.addColorStop(1,'green');
+			b.fillStyle = c;
+			b.fillRect(0,0,600,600);
+		}
+
+	</script>
+</body>
+</html>

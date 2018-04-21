@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		*{
+			margin: 0;
+			padding:0;
+		}
+
+	</style>
+</head>
+<body>
+	<canvas id="cas"></canvas>
+	<script type="text/javascript">
+		window.onload = function(){
+			var a = document.getElementById('cas');
+			var b = a.getContext('2d');
+			// b.beginPath();
+			// b.lineCap = 'butt';
+			// b.lineWidth = '10';
+			// b.moveTo(20,20);
+			// b.lineTo(200,20);
+			// b.stroke();
+			
+			// b.beginPath();
+			// b.lineCap = 'round';
+			// b.lineWidth = '10';
+			// b.moveTo(20,40);
+			// b.lineTo(200,40);
+			// b.stroke();
+
+			// b.beginPath();
+			// b.lineCap = 'square';
+			// b.lineWidth = '10';
+			// b.moveTo(20,60);
+			// b.lineTo(200,60);
+			// b.stroke();
+
+			// b.lineWidth = '10';
+			// b.moveTo(20,20);
+			// b.lineTo(100,50);
+			// b.lineTo(20,100);
+			// b.lineJoin = 'bevel';
+			// b.stroke();
+
+			b.lineJoin = 'miter';
+			b.miterLimit = '3'
+			b.lineWidth = '10';
+			b.moveTo(50,50);
+			b.lineTo(100,100);
+			b.lineTo(50,120);
+			//b.lineTo(50,200);
+			b.stroke();
+
+		}
+	</script>
+</body>
+</html>

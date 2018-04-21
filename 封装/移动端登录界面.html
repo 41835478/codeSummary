@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+	<title></title>
+	<style>
+		*{
+			margin: 0;
+			padding: 0;
+		}
+	
+		html,body{
+			height: 100%;
+			overflow: hidden;
+			background-color:rgba(0,0,0,0.3);
+		}	
+
+		em{
+			font-style: normal;
+		}
+
+		strong{
+			display: block;
+		}
+		
+		.lb-login-wrap{
+			position: relative;
+			width: 90%;
+			margin: 0 auto;
+			font-size: 16px;
+			border: 1px solid #000;
+			color: #464F62;
+			font-weight: bold;
+			background-color: #FFFFFF;
+			padding-bottom:15px;
+
+		}
+
+		.lb-login-header{
+			text-align: center;
+			height: 45px;
+			line-height: 45px;
+			background-image: -webkit-linear-gradient(top, #f4f5f8, #eceff4);
+            background-image: linear-gradient(top, #f4f5f8, #eceff4);
+            border-bottom: 1px solid #FFFFFF;
+            box-shadow: 0px 2px 1px #C6C8CC;
+
+		}
+
+		.lb-login-back{
+			position: absolute;
+			left: 7%;
+			top: 0;
+			font-size: 14px;
+			color:#808080;
+		}
+
+		.lb-login-content{
+			padding: 0 7%;
+		}
+
+
+		.lb-login-content-title{
+			text-align: center;
+			margin: 5% auto;
+		}
+
+		.lb-login-input input{
+			outline: none;
+			border: none;
+			background-color: transparent;
+			height:30px; 
+			border: 1px solid #CCCCCC;
+		}
+
+		.lb-login-input label{
+			display: block;
+			height: 32px;
+		}
+
+		.lb-login-input input:focus{
+			border: 1px solid #60D15F;
+		}
+
+
+
+		.lb-login-telephone{
+			margin-bottom: 5px;
+		}
+
+		.lb-login-telephone input{
+			float: left;
+			width: 68%;
+		}
+
+		.lb-login-telephone span,.lb-login-code span{
+			float: left;
+			height: 32px;
+			line-height: 32px;
+			width: 30%;
+			text-align: center;
+		}
+
+
+
+		.lb-login-code input{
+			float: left;
+			width: 39%;
+		}
+
+		.lb-login-code em{
+			float: left;
+			height: 32px;
+			line-height: 32px;
+			width: 18%;
+			text-align: center;
+			background-color: #FF8D06;
+			color: #fff;
+			margin-left: 3%;
+			padding: 0 4%;
+			font-size: 14px;
+			border-radius: 5px;
+			box-shadow: 0px 2px 1px #E76D00;
+		}
+
+		.lb-login-code strong{
+			font-size: 14px;
+			color: red;
+			margin: 10px 0;
+		}
+
+		.lb-login-submit{
+			background-color: #60D15F;
+			text-align: center;
+			color: #fff;
+			font-size: 18px;
+			padding: 5px 0;
+			box-shadow: 0px 2px 1px #43B842;
+			border-radius:5px;
+		}
+
+
+
+	</style>
+</head>
+<body>
+	<div id="lb-login-wrap" class="lb-login-wrap">
+		<div id="lb-login-header" class="lb-login-header">
+			<span id="lb-login-back" class="lb-login-back">&lt;返回</span>
+			<span class="lb-login-title">猎豹游戏</span>
+		</div>
+		<div class="lb-login-content">
+			<div class="lb-login-content-title">用户登录</div>
+			<div class="lb-login-input lb-login-telephone">
+				<label>
+					<span>手机号：</span>
+					<input type="text" >
+				</label>
+			</div>
+			<div class="lb-login-input lb-login-code">
+				<label>
+					<span>验证码：</span>
+					<input type="text">
+					<em>发送</em>
+				</label>
+				<label>
+					<span></span>
+					<strong>*手机号格式不对</strong>
+				</label>
+				
+			</div>
+			<div id="lb-login-submit" class="lb-login-submit">绑定</div>
+		</div>
+	</div>
+	<script>
+
+	</script>
+</body>
+</html>

@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>封装轮播</title>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+	<style>
+		*{
+			margin: 0;
+			padding: 0;
+		}
+
+		.main {
+			margin: auto;
+		    max-width:768px;
+		}
+
+		@media screen and (min-device-width :768px) and (orientation :landscape) {
+		    .main {
+		        width: 768px;
+		    }
+		}
+		.banner{
+		    position:relative;
+		    overflow:hidden;
+		    zoom: 1;
+		}
+		.banner-item{
+		    float:left;
+		    display:block;
+		}
+		.banner-item-single{
+		    float:none;
+		    display:block;
+		}
+		.banner-content{
+		    position:absolute;
+		    top:0;
+		    left:0;
+		    width:100%;
+		    height:100%;
+		    -webkit-transition:left 0.5s;
+		    transition:left 0.5s;
+		}
+		.banner-stretch{
+		    display:block;
+		    height:0;
+		    padding-bottom:38.9%;
+		}
+		.banner-img {
+		    width:100%;
+		    height:100%;
+		    display:block;
+		    border-radius: 3px;
+		}
+		.banner-img-single{
+		    position:absolute;
+		    top:0;
+		    left:0;
+		}
+		.banner-pager{
+		    position:absolute;
+		    bottom: 3.5%;
+		    left: 0;
+		    width:100%;
+		    height: 2.1%;
+		    text-align:center;
+		    display: block;
+		    line-height: 0;
+		}
+		.banner-pager-btn{
+		    display: inline-block;
+		    vertical-align:top;
+		    width: 5.6%;
+		    margin-right: 1.4%;
+		    height: 100%;
+		    background: #eee;
+		    background: rgba(255,255,255,0.5);
+		}
+		.banner-pager-btn-last{
+		    margin: 0;
+		}
+		.banner-pager-btn-active{
+		    background: rgba(0, 0, 0, 0.5);
+		}
+		.clear{
+		    display: block;
+		    height: 0;
+		    clear: both;
+		}
+	</style>
+</head>
+<body>
+	<div class="main" id="main">
+		<div class="banner" id="banner"></div>
+	</div>
+	<script id="temp-banner-single" type="text/template"><a class="banner-item-single" target="_blank" href=##link_url## ><span class="banner-stretch"></span><img class="banner-img banner-img-single" src=##img_url## /></a></script>
+    <script id="temp-banner" type="text/template"><a class="banner-item" target="_blank" href=##link_url##><img class="banner-img" src=##img_url## /></a></script>
+</body>
+<script>		
+
+	var win = window;
+	var doc = document;
+
+	function isArrayLike(arr){
+	    if(arr && 'length' in arr){
+	        var len = arr.length;
+	        if(typeof len === 'number' &&
+	                (
+	                    len === 0 ||
+	                    (0 in arr && len-1 in arr)
+	                )
+	            ){
+	            return true;
+	        }
+	    }
+	    return false;
+	}
+
+	function forEach(arr, fn) {
+	    var i;
+	    if (arr && typeof arr === 'object') {
+	        if (isArrayLike(arr)) {
+	            var len = arr.length;
+	            for (i = 0; i < len; ++i) {
+	                if (fn(arr[i], i) === false) {
+	                    break;
+	                }
+	            }
+	        }else{
+	            var hasOwnProperty = 'hasOwnProperty' in arr;
+	            for (i in arr) {
+	                if (!hasOwnProperty || arr.hasOwnProperty(i)) {
+	                    if (fn(arr[i], i) === false) {
+	                        break;
+	                    }
+	                }
+	            }
+	        }
+	    }
+	}
+
+	var htmlEntities = {
+	    '&': '&amp;',
+	    '"': '&quot;',
+	    "'": '&apos;',
+	    '<': '&lt;',
+	    '>': '&gt;'
+	};
+	var htmlEntityReg = /[&"'<>]/g;
+	function htmlEntityReplace(match){
+	    return htmlEntities[match];
+	}
+	function htmlEscape(html){
+	    return html.replace(htmlEntityReg, htmlEntityReplace);
+	}
+	function template(str, obj){
+	    return str.replace(/##([^#]+)##/g, function(match, key){
+	        if(obj.hasOwnProperty(key)){
+	            return htmlEscape(String(obj[key]));
+	        }else{
+	            return '';
+	        }
+	    });
+	}
+
+	function getById(id){
+	    return doc.getElementById(id);
+	}
+
+	function preventDefault(e){
+	    if(e.preventDefault){
+	        e.preventDefault();
+	    }else{
+	        e.returnValue = false;
+	    }
+	}
+	function stopPropagation(e){
+	    if(e.stopPropagation){
+	        e.stopPropagation();
+	    }else{
+	        e.cancelBubble = false;
+	    }
+	}
+
+	function getX(e){
+	    return e.touches ? e.touches[0].clientX : e.clientX;
+	}	
+
+	function getNow(sec){
+	    var now = Date.now ? Date.now() : (new Date()).getTime();
+	    if(sec){
+	        now = Math.floor(now / 1000 / sec);
+	    }
+	    return now;
+	}
+
+	function on(el, events, fn, capture){
+	    forEach(events.split(' '), function(ev){
+	        if(el.addEventListener){
+	            el.addEventListener(ev, fn, Boolean(capture));
+	        }else{
+	            el.attachEvent('on' + ev, fn);
+	        }
+	    });
+	}
+
+	function off(el, events, fn, capture){
+	    forEach(events.split(' '), function(ev){
+	        if(el.removeEventListener){
+	            el.removeEventListener(ev, fn, Boolean(capture));
+	        }else{
+	            el.detachEvent('on' + ev, fn);
+	        }
+	    });
+	}
+
+	function onClick(e){
+        var target = e.target || e.srcElement;
+        var tagName;
+        while(true){
+            if(!target){
+                return;
+            }else if(
+                    (tagName = target.tagName) &&
+                    tagName.toLowerCase() === 'a'
+                ){
+                var track = target.getAttribute('data-track-click');
+                // if(track){
+                //     _hmt.push(['_trackEvent', 'click', track]);
+                // }
+                return target;
+            }else{
+                target = target.parentNode;
+            }
+        }
+    }
+
+
+	var raf = win.requestAnimationFrame || win.webkitRequestAnimationFrame || function(fn){
+	    return setTimeout(fn ,16);
+	};
+
+	function transitionOff(dom){
+        dom.style.webkitTransition = dom.style.transition = 'none';
+    }
+    function transitionOn(dom){
+        dom.style.webkitTransition = dom.style.transition = '';
+    }
+
+    function getInnerWidth(){
+        return win.innerWidth || doc.documentElement.clientWidth || doc.body.clientWidth;
+    }
+    function getInnerHeight(){
+        return win.innerHeight || doc.documentElement.clientHeight || doc.body.clientHeight;
+    }
+
+	
+
+	// var bannerData = [
+	// 	{img_url: "http://www.liebao.cn/game/ad/banner.jpg",link_url: "/game/AppDownPage/index.html?f=gamecenter"}
+	// ];
+	var len;
+	function slideCast(config){
+		bannerData = config.json;
+		slideTime = config.time;
+		slidePages = config.isPage;
+		if(bannerData && (len = bannerData.length)){
+	        var $banner = getById('banner');
+	        if(len == 1){
+	            $banner.innerHTML = template(getById('temp-banner-single').innerHTML, bannerData[0]);
+	        	return;
+	        }
+
+	        var html = '';
+	        forEach(bannerData, function(data){
+	            html += template(getById('temp-banner').innerHTML, data);
+	        });
+
+	        html = '<span class="banner-stretch"></span><span id="banner-content" class="banner-content">' + html + '</span>';
+
+	        function pageHtml(){
+	            var pagers = [];
+	            for(var i=0;i<len;++i){
+	                pagers.push('<span class="banner-pager-btn '+ (i === len -1 ? 'banner-pager-btn-last' : '')+'"></span>');
+	            }
+	            var html = '<span id="banner-pager" class="banner-pager">' + pagers.join('') + '</span>';
+	            return html;
+	        }
+
+	        $banner.innerHTML = html + (slidePages?pageHtml():'');
+
+	        var $banners = $banner.getElementsByTagName('a');
+
+	        var width;
+	        var height;
+	        var current = 0;
+	        var $bannerContent = getById('banner-content');
+
+	        
+
+	        var _innerWidth = getInnerWidth();
+	        var _innerHeight = getInnerHeight();
+
+	        var docEl = document.documentElement;
+	        function onResize(){
+	            width = $banner.offsetWidth;
+	            height = $banner.offsetHeight;
+	            _innerWidth = getInnerWidth();
+	            _innerHeight = getInnerHeight();
+	            forEach($banners, function(node){
+	                node.style.width = width + 'px';
+	                node.style.height = height + 'px';
+	            });
+	            var left = -current * width;
+	            $bannerContent.left = left;
+	            bannerLock = true;
+	            transitionOff($bannerContent);
+	            raf(function(){
+	                $bannerContent.style.left = left + 'px';
+	                $bannerContent.style.width = len * width + 'px';
+	                raf(function(){
+	                    transitionOn($bannerContent);
+	                    bannerLock = false;
+	                });
+	            });
+	        }
+
+	        var rotateIt;
+
+	        on(win, 'resize', function(){
+	            clearInterval(rotateIt);
+	            function _onResize(){
+	                if(getInnerWidth() !== _innerWidth || getInnerHeight() !== _innerHeight){
+	                    onResize();
+	                    return true;
+	                }
+	            }
+	            if(!_onResize()){
+	                var start = getNow();
+	                rotateIt = setInterval(function(){
+	                    var now = getNow();
+	                    if(_onResize() || now - start > 2000){
+	                        return clearInterval(rotateIt);
+	                    }
+	                }, 13);
+	            }
+	        });
+
+	        onResize();
+
+	        if(slidePages){
+	        	var $pagers = (function(nodes){
+		            var arr = [];
+		            forEach(nodes, function(node){
+		                if(node.tagName){
+		                    arr.push(node);
+		                }
+		            });
+		            return arr;
+		        })(doc.getElementById('banner-pager').childNodes);
+		        var bannerPagerClass = 'banner-pager-btn';
+	        	var bannerPagerActiveClass = 'banner-pager-btn banner-pager-btn-active';
+	        	$pagers[current].className = bannerPagerActiveClass;
+	        }
+	        
+
+	        var bannerLock = false;
+	        
+	        var trackObj = {
+	            0: 0
+	        };
+	        function setCurrent(i){
+	            if(bannerLock){
+	                return;
+	            }
+	            var left = - i * width;
+	            $bannerContent.left = left;
+	            if($bannerContent._left && $bannerContent._left === left){
+	                return;
+	            }
+	            bannerLock = true;
+	            current = i;
+	            $bannerContent.style.left = left + 'px';
+	            
+		            setTimeout(function(){
+		            	if(slidePages){
+			                forEach($pagers, function(a, i){
+			                    if(i === current){
+			                        a.className = bannerPagerActiveClass;
+			                    }else if(a.className === bannerPagerActiveClass){
+			                        a.className = bannerPagerClass;
+			                    }
+			                });
+		                }
+		                bannerLock = false;
+		            }, 600);
+	            
+	            
+	        }
+
+	        var slidesIt;
+	        function slidesOn(){
+	            if(slidesIt){
+	                return;
+	            }
+	            slidesIt = setInterval(function(){
+	                var now = current + 1;
+	                if(now >= len){
+	                    now = 0;
+	                }
+	                setCurrent(now);
+	            }, slideTime);
+	        }
+
+	        function slidesOff(){
+	            if(!slidesIt){
+	                return;
+	            }
+	            clearInterval(slidesIt);
+	            slidesIt = undefined;
+	        }
+
+	        slidesOn();
+
+	        on($banner, 'touchstart mousedown', function(e){
+	            var eventMove = 'touchmove';
+	            var eventUp = 'touchend';
+	            if(e.type === 'mousedown'){
+	                if(('which' in e ? e.which : e.button) !== 1){
+	                    return;
+	                }else{
+	                    eventMove = 'mousemove';
+	                    eventUp = 'mouseup';
+	                }
+	            }
+
+	            var moved = false;
+	            preventDefault(e);
+
+	            function onMove(e){
+	                preventDefault(e);
+	                var now = getNow();
+	                if(now - last < 17){
+	                    return;
+	                }
+	                last = now;
+	                var nowX = getX(e);
+	                move = nowX - startX;
+	                if(Math.abs(move) > 10){
+	                    moved = true;
+	                }
+	                var left = Math.min(0, Math.max($bannerContent.left + move, - (len - 1) * width));
+	                $bannerContent._left = left;
+	                $bannerContent.style.left = left + 'px';
+	            }
+
+	            function onEnd(e){
+	                preventDefault(e);
+	                if(!e.target){
+	                    e = {
+	                        target: e.srcElement
+	                    };
+	                }
+	                off(doc, eventMove, onMove);
+	                off(doc, eventUp, onEnd);
+	                transitionOn($bannerContent);
+	                raf(function(){
+	                    bannerLock = false;
+	                    setCurrent(Math.max(0, Math.min(len-1, moved ? (move>0 ? current-1 : current+1 ) : current )));
+	                    if(moved){
+	                        setTimeout(function(){
+	                            moved = false;
+	                            slidesOn();
+	                        }, 600);
+	                    }else{
+	                        var target = onClick(e);
+	                        var href;
+	                        if(target && (href = target.href)){
+	                            setTimeout(function(){
+	                                location.href = href;
+	                            }, 300);
+	                        }
+	                    }
+	                });
+	            }
+	            if(!bannerLock){
+	                bannerLock = true;
+
+	                slidesOff();
+	                var startX = getX(e);
+
+	                transitionOff($bannerContent);
+
+	                var last = getNow();
+	                var move = 0;
+	                on(doc, eventMove, onMove);
+	                on(doc, eventUp, onEnd);
+	            }
+	        });
+	        on($banner, 'click', function(e){
+	            preventDefault(e);
+	        });
+		}
+	}
+
+	//slideCast();
+            
+/*
+	默认是无控制键，非无限划，不单向，时间2秒
+*/      
+var bannerData = [
+	{img_url: "http://www.liebao.cn/game/ad/banner.jpg",link_url: "/game/AppDownPage/index.html?f=gamecenter"},
+	{img_url: "http://www.liebao.cn/game/ad/TU.jpg",link_url: "http://m.9724.com/zt/xnny.html?f=gamecenter"},
+	{img_url: "http://www.liebao.cn/game/ad/TU(1).jpg",link_url: "http://m.9724.com/zt/yjwl/dl.html?f=gamecenter?f=gamecenter"}
+];
+slideCast({
+	json:bannerData,
+	isPage:true,
+	time:2000
+});
+
+
+
+</script>
+</html>

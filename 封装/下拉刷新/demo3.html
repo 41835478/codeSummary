@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title></title>
+    <style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+    
+    ul,
+    li {
+        list-style: none;
+    }
+    
+    .refresh_tip {
+        content: '';
+        width: 100%;
+        height: 93px;
+        margin-top: -93px;
+        text-align: center;
+        position: relative;
+        -webkit-transition: 0.4s;
+    }
+    
+    .refresh_tip.down:before,
+    .refresh_tip.up:before,
+    .refresh_tip.on:before {
+        content: 'Pull to refresh';
+        display: block;
+        height: 93px;
+        line-height: 93px;
+        color: #666;
+        position: absolute;
+        z-index: 5;
+        text-indent: 86px;
+        width: 100%;
+        text-align: center;
+        font-size: 20px;
+    }
+    
+    .refresh_tip.up:before {
+        text-indent: 130px;
+        content: 'Release to refresh';
+    }
+    
+    .refresh_tip.on:before {
+        content: 'Refreshing...';
+    }
+    /* refresh loading */
+    
+    .refresh_tip i:before {
+        -webkit-transition: 0.5s;
+    }
+    
+    .refresh_tip.down i:before,
+    .refresh_tip.up i:before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        display: block;
+        z-index: 5;
+        width: 43px;
+        height: 43px;
+        margin: -25px 0 0 -130px;
+        background: url(img/arrow.png) no-repeat center;
+        background-size: contain;
+    }
+    
+    .refresh_tip.down i:before {
+        -webkit-transform: rotate(180deg);
+    }
+    
+   
+    </style>
+</head>
+
+<body>
+    <div id="inf_scroll_wrap">
+        <div id="refresh_tip" class="refresh_tip"><i></i></div>
+    </div>
+</body>
+<script>
+
+
+var refreshFun;
+var loadMoreFun;
+var startX;
+var startY;
+var transY;
+var isRefresh;
+var inf_scroll_wrap;
+
+function handleTouchstart(e) {
+    startX = e.touches[0].pageX;
+    startY = e.touches[0].pageY;
+}
+
+function handleScroll(e) {
+
+    var body = document.body;
+    var scrollTop = body.scrollTop;
+    var bodyH = body.clientHeight - 100;
+    var winH = window.document.documentElement.clientHeight;
+    var moveX, moveY;
+
+
+    if (e.type == 'touchmove') {
+        moveX = e.touches[0].pageX - startX;
+        moveY = e.touches[0].pageY - startY;
+
+        if (scrollTop == 0) {
+            var tip = document.getElementById('refresh_tip');
+            inf_scroll_wrap = document.getElementById('inf_scroll_wrap');
+            inf_scroll_wrap.style.webkitTransition = '0s';
+            inf_scroll_wrap.style.webkitTransform = 'translate3d( 0,' + (moveY * 0.5) + 'px, 0)';
+
+            if (moveY > tip.clientHeight * 3.5) {
+                tip.className = 'refresh_tip up';	
+                isRefresh = 1;
+            } else {
+                tip.className = 'refresh_tip down';
+                isRefresh = 0;
+            }
+        }
+    }
+}
+
+function handTouchend(e) {
+
+    var tip = document.getElementById('refresh_tip');
+    var inf_scroll_wrap = document.getElementById('inf_scroll_wrap');
+
+    inf_scroll_wrap.style.webkitTransition = '0.6s';
+    if (isRefresh == 0) {
+        inf_scroll_wrap.style.webkitTransform = 'translate3d( 0, 0, 0)';
+        return
+    } else {
+        isRefresh = 0;
+        inf_scroll_wrap.style.webkitTransform = 'translate3d( 0, 100px, 0)';
+        tip.className = 'refresh_tip on';
+
+        clearTimeout(refreshFun);
+        refreshFun = setTimeout(function() {
+            location.reload();
+        }, 1000);
+    }
+}
+
+
+if ("ontouchend" in document) {
+    window.addEventListener('touchstart', handleTouchstart);
+    window.addEventListener('touchmove', handleScroll);
+    window.addEventListener('touchend', handTouchend);
+    window.addEventListener('touchcancel', handTouchend);
+}else {
+    window.addEventListener('scroll', handleScroll);
+}
+</script>
+
+</html>

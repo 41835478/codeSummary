@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+	<title></title>
+	<style>
+		*{
+			margin: 0;
+			padding: 0;
+		}
+
+		canvas{
+			border: 1px solid #000;
+			margin: 20px;
+		}
+	
+
+	</style>
+</head>
+<body>
+	mask:
+	<canvas id="cas"></canvas>
+	
+</body>
+<script>
+
+		Array.prototype.min = function(){ 
+			return Math.min.apply({},this) 
+		} 
+
+		Array.prototype.max = function(){ 
+			return Math.max.apply({},this) 
+		}
+
+		var oCas = document.getElementById('cas');
+		function CanvasImage(canvas, image) {
+	        if(!image) {
+	            image = new Image();
+	        }
+	        this.image = image;
+	        this.canvas = canvas;
+	        this.canvas.width = image.width;
+	        this.canvas.height = image.height;
+	        this.context = canvas.getContext("2d");
+	        this.context.drawImage(image, 0, 0);
+
+	        var img1 = this.context.getImageData(0, 0, this.canvas.width, this.canvas.height);
+			var binary = new Uint8Array(img1.data.length);
+
+			console.log('len',img1.data.length)
+
+			for (var i = 0; i < img1.data.length; i++) {
+			    binary[i] = img1.data[i];
+			}
+
+			console.log('binary',binary);
+
+			// for (var px=0,ct=image.width*image.height*4;px<ct;px+=4){//4的含义是一个像素点代表4个索引 rgba
+			// 	var r = img1.data[px  ];
+			// 	var g = img1.data[px+1];
+			// 	var b = img1.data[px+2];
+			// 	var a = img1.data[px+3];
+			// 	console.log(a)
+			// }
+			//width 20px height 20px
+			//20*20*4 = 1600个像素点 本来有400个像素点 但是要包含其他通道 20*4 一行
+			/*计算方法：
+				每次扫行的时候 获取一行的最小值和最大值
+				再获取最小值中的最小值 最大值中的最大值
+				最小值为minW
+				最大值为maxW
+				第一次>0为minH
+				最后一次>0为maxH
+			*/
+
+			var arr = [];
+			var imgRows = image.height * 4;
+			var imgCols = image.width * 4;
+			var everyRowArr = [];
+			var ereryMinRow = [];
+			var ereryMaxRow = [];
+			var minRowTotal;
+			var maxRowTotal;
+			var realMinWidth;
+			var realMaxWidth;
+			var realMinHeight;
+			var realMaxHeight;
+
+			var actualW;
+			var actualH;
+
+			/*
+				索引是累积的 每到imgCols的倍数 - 1 就换行
+			*/
+
+			for(var i=0;i<binary.length;i++){
+				if(binary[i]>0){//有像素的时候，把索引存到数组
+					arr.push(i);
+				}
+
+				if((i+1)%imgCols != 0){//在1行内的时候
+
+					if(binary[i]>0){//碰到有像素的时候，就存到数组里
+						everyRowArr.push(i);
+					}
+					
+				}else{//换行的时候
+					if(everyRowArr.length > 0){//计算上一行的最小值
+						
+						/*
+							计算与该行的起始值的差值
+							i是第二行的第一个索引【与带不带像素无关】
+						*/
+
+						//console.log('everyRowArr',everyRowArr)//每行带有像素的索引点
+						//console.log('everyRowArr.min',everyRowArr.min())//每行带有像素的最小值
+						//console.log('everyRowArr.max',everyRowArr.max())//每行带有像素的最大值
+
+						var disMinRow = everyRowArr.min() - (i - imgCols);
+						//i是第二行的索引 imgCols是一行的像素点的个数 i - imgCols 为回到上一行i的起始索引 这样就和everyRowArr 在同一行了 然后
+						//求出该行的差值
+						var disMaxRow = everyRowArr.max() - (i - imgCols);//同理
+
+						ereryMinRow.push(disMinRow);
+						ereryMaxRow.push(disMaxRow);	
+						everyRowArr = [];
+					}
+				}
+			}
+
+			if(ereryMinRow.length>0){//不是取最小的 而是取与相对的行的差值最小
+				minRowTotal = ereryMinRow.min();
+			}
+
+			if(ereryMaxRow.length>0){
+				maxRowTotal = ereryMaxRow.max();
+			}
+
+			
+			realMinWidth = minRowTotal/4 - 1;
+			realMaxWidth = maxRowTotal/4;
+			
+			console.log('实际到左部的距离',realMinWidth);
+			console.log('实际到右部的距离',realMaxWidth);
+
+			/*--------------------------------------------------*/
+
+			var initIndex = arr[0];
+			var endIndex = arr[arr.length - 1];
+
+			realMinHeight = Math.floor(initIndex/imgCols);
+			realMaxHeight = Math.ceil(endIndex/imgCols);
+
+			console.log('实际到顶部的距离',realMinHeight);
+			console.log('实际到底部的距离',realMaxHeight);
+
+
+			actualW = realMaxWidth - realMinWidth;
+			actualH = realMaxHeight - realMinHeight; 
+
+			console.log('真实宽度',actualW,'px');
+			console.log('真实高度',actualH,'px');
+
+			var result = {
+				x:realMinWidth,
+				y:realMinHeight,
+				width:actualW,
+				height:actualH
+			}
+
+			getClipImg(image,result);
+	
+	    };
+
+	    function getClipImg(img,obj){
+	    	console.log(obj)
+	    	var newCas = document.createElement('canvas');
+	    	var newCtx = newCas.getContext('2d');
+	    	newCas.width = obj.width;
+	    	newCas.height = obj.height;
+	    	newCtx.drawImage(img,obj.x,obj.y,obj.width,obj.height,0,0,obj.width,obj.height);
+	    	document.body.appendChild(newCas);
+
+	    	var newImg = new Image();
+	    	newImg.src = newCas.toDataURL('image/png');
+	    	document.body.appendChild(newImg);
+
+	    }
+
+		var initImg = new Image();
+		initImg.src = 'img/mask5.png';
+		initImg.onload = function(){
+			CanvasImage(oCas,initImg);
+		}
+		
+	</script>
+</html>

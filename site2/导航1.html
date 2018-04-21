@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		*{
+			margin:0;
+			padding:0;
+		}
+
+		#daohang{
+			width: 600px;
+			height: 200px;
+			-border-bottom: 1px solid black;	
+			position: relative;
+			-webkit-transform:perspective(800px);
+			-webkit-transform-style:preserve-3d;
+		}
+/*
+	星星移动
+*/
+		#star{
+			width: 30px;
+			height: 30px;
+			-background: red;
+			position: absolute;
+			bottom: 0px;
+			background:url('nav_img/windmill.png') no-repeat;
+			background-size: contain;
+		}
+
+		.starMove{
+			-webkit-animation:loop 0.4s linear infinite;
+		}
+
+		@-webkit-keyframes loop{
+			0%{
+				-webkit-transform:rotate(0deg);
+			}
+			100%{
+				-webkit-transform:rotate(360deg);	
+			}
+		}
+/*
+	画出线
+*/
+		.lineUnit{
+			width:10px;
+			height: 35px;
+			position: absolute;
+			bottom: 0px;
+		}
+
+		/*#lineWrap{
+			height: 300px;
+			border:1px solid red;
+			-position: relative;
+		}*/
+
+		#lineWrap div:nth-child(7n+1) {
+		    background-color: #F00;
+		}
+		#lineWrap div:nth-child(7n+2) {
+		    background-color: #F60;
+		}
+		#lineWrap div:nth-child(7n+3) {
+		    background-color: #FF0;
+		}
+		#lineWrap div:nth-child(7n+4) {
+		    background-color: #0C0;
+		}
+		#lineWrap div:nth-child(7n+5) {
+		    background-color: #699;
+		}
+		#lineWrap div:nth-child(7n+6) {
+		    background-color:#06C;
+		}
+		#lineWrap div:nth-child(7n+7) {
+		    background-color:#909;
+		}
+
+		.lineUnitMove{
+			-webkit-animation:up 500ms ease;
+		}
+
+		@-webkit-keyframes up{
+			0%{
+				bottom:-10px;
+			}
+			100%{
+				bottom: 0;
+			}
+		}
+
+/*
+	cloud
+*/
+		#cloudWrap{
+			-display: none;
+			position: absolute;
+			top:0;
+			
+		}
+
+		@-webkit-keyframes fade-in{
+			0%{
+				opacity: 0;
+			}
+			100%{
+				opacity: 1;
+			}
+		}
+
+		@-webkit-keyframes fade-out{
+			0%{
+				opacity: 1;
+			}
+			100%{
+				opacity: 0;
+			}
+		}
+
+		#cloud1,#cloud2{
+			width: 200px;
+			height: 80px;
+			position: absolute;
+		}
+
+		#cloud1{
+			left: 80px;
+		}
+
+		#cloud2{
+			left: 300px;
+		}
+
+		.cloud1_fade_in{
+			-webkit-animation:fade-in 500ms linear;
+			animation:fade-in 500ms linear;
+			-webkit-animation-fill-mode: both;
+    		animation-fill-mode: both;
+    		background: url('nav_img/cloud1.png') no-repeat;
+    		background-size: contain;
+		}
+
+		.cloud1_fade_out{
+			-webkit-animation:fade-out 500ms linear;
+			animation:fade-out 500ms linear;
+			-webkit-animation-fill-mode: both;
+    		animation-fill-mode: both;
+    		background: url('nav_img/cloud1.png') no-repeat;/*背景图必须得有，不然无法淡出*/
+    		background-size: contain;
+		}
+
+		.cloud2_fade_in{
+			-webkit-animation:fade-in 500ms linear 200ms;
+			animation:fade-in 500ms linear 200ms;
+			-webkit-animation-fill-mode: both;
+    		animation-fill-mode: both;
+    		background: url('nav_img/cloud2.png') no-repeat;
+    		background-size: contain;
+		}
+
+		.cloud2_fade_out{
+			-webkit-animation:fade-out 500ms linear;
+			animation:fade-out 500ms linear;
+			-webkit-animation-fill-mode: both;
+    		animation-fill-mode: both;
+    		background: url('nav_img/cloud2.png') no-repeat;
+    		background-size: contain;
+		}
+
+		.wrapRotate1{
+			-webkit-transform-origin:0 0;
+			-webkit-transition:all 3s linear;	
+			-webkit-transform:rotateX(90deg);
+		}
+
+		.wrapRotate2{
+			-webkit-transform-origin:center bottom;
+			-webkit-transition:all 3s linear;
+			-webkit-transform:rotateX(0deg);
+		}
+
+/*
+	雨
+*/		
+		.rain{
+			width: 10px;
+			height: 40px;
+			-background: green;
+			position: absolute;
+			top:80px;
+			background: url('nav_img/rain.png') no-repeat;
+			background-size: contain;
+		}
+
+
+
+	</style>
+	<script type="text/javascript" src="jquery.js"></script>
+</head>
+<body>
+	<div id="daohang">
+		<div id="cloudWrap">
+			<div id="cloud1" class=""></div>
+			<div id="cloud2" class=""></div>
+		</div>
+		<div id="lineWrap"></div>
+		<!-- <div id="rainWrap">
+
+		</div> -->
+	</div>
+	
+</body>
+<script type="text/javascript">
+
+	var daohangDiv = document.getElementById('daohang');
+	var lineWrapDiv = document.getElementById('lineWrap');
+	var cloud1Div = document.getElementById('cloud1');
+	var cloud2Div = document.getElementById('cloud2');
+	var rainNum = 1;
+	var nav = {
+		star:function(){
+			var star = document.createElement('div');
+			this.star = star;
+			star.id = 'star';
+			star.className = 'starMove';
+			daohangDiv.appendChild(star);
+			this.starMove();
+		}
+		,
+		starMove:function(){
+			var that = this;
+			var speedX = 10;
+			this.starTimer = setInterval(starM,20);
+			function starM(){
+				var L = that.star.offsetLeft;
+				if(L == 490){//共50块
+					clearInterval(that.starTimer);
+					cloud1Div.className = 'cloud1_fade_in';
+					cloud2Div.className = 'cloud2_fade_in';
+					setTimeout(function(){
+						that.rain();
+					},1000)
+					
+				}
+				that.star.style.left = L + speedX + 'px';
+				that.line(L);
+
+			}
+		}
+		,
+		init:function(){
+			this.star();
+		}
+		,
+		line:function(lineLeft){
+			var lineUnit = document.createElement('div');
+			this.lineUnit = lineUnit;
+			lineUnit.className = 'lineUnit';
+			lineUnit.style.left = lineLeft + 'px';
+			$(lineUnit).addClass('wrapRotate1');
+			lineWrapDiv.appendChild(lineUnit);
+		}
+		,
+		rain:function(){
+			var that = this;
+			that.rainNumTimer = setInterval(function(){
+
+				that.randomRain(that);
+				if(rainNum == 5){
+					clearInterval(that.rainNumTimer);
+					setTimeout(function(){
+						//alert()
+						//云彩淡出，彩虹变为黑白色，颜色也是渐渐变化的
+						that.turn();
+					},1000)
+					
+				}
+				rainNum++;
+			},300)
+		}
+		,
+		randomRain:function(This){//生产随机雨
+			//alert()
+			var that = This;
+			var rain = document.createElement('span');
+			that.rain = rain;
+			rain.className = 'rain';
+			var ran = that.getRandomLeft();
+			rain.style.left = ran + 'px';
+			daohangDiv.appendChild(rain);
+			that.rainDrop(that.rain);
+		}
+		,
+		rainDrop:function(s){//雨下降
+			//s为雨滴 dom对象
+			var that = this;
+			var speedY = 7;
+			function drop(){
+				if(s.offsetTop >= 160){
+					clearInterval(that.dropTimer);
+					//产生碰撞
+					that.lineUnitUp(s);
+				}
+				s.style.top = s.offsetTop + speedY + 'px';
+
+			}
+			that.dropTimer = setInterval(drop,10)//下雨
+		}
+		,
+		lineUnitUp:function(s){//线反弹，并且删除雨滴
+			$(s).remove();
+			var that = this;
+			var l = parseInt(s.style.left);
+			var t = $('.lineUnit')[l/10];//碰撞的那个线单元对象
+			// var c = $('.lineUnit').filter(function (d) { 
+			// 	console.log(d)//索引
+			// 	return /left\:20px/.test($(d).prop('style')); 
+			// })
+			//console.log(c)
+			$(t).addClass('lineUnitMove');
+			
+			setTimeout(function(){
+				$(t).removeClass('lineUnitMove');
+			},100)
+		}
+		,
+		getRandomLeft:function(){
+			var random = Math.floor(Math.random()*50)*10;
+			return random;
+		}
+		,
+		turn:function(){
+			var that = this;
+			cloud1Div.className = 'cloud1_fade_out';
+			cloud2Div.className = 'cloud2_fade_out';
+			//lineWrap
+			setTimeout(function(){
+				that.star.className = '';
+			},1000)
+
+			$('.lineUnit').addClass('wrapRotate2');
+			
+
+		}
+	};
+
+	nav.init();
+
+</script>
+</html>

@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+	<title></title>
+	<style>
+		*{
+			margin: 0;
+			padding: 0;
+		}
+
+		html,body{
+			width: 100%;
+			height: 100%;
+			overflow-x: hidden;
+		}
+
+		.center{
+			opacity: 0;
+			position: absolute;
+			left:0;
+			top:0;
+			width: 150px;
+			background-color: #eee;
+			z-index: 0;
+		}
+
+		.center.on{
+			opacity:1;
+		}
+
+		.center-header{
+			height: 30px;
+			text-align: center;
+		}
+
+		.main{
+			position: relative;
+			background-color:#fff;
+			-webkit-transition:all .5s ease-out;
+		}
+
+		.main.right{
+			-webkit-transform:translate3d(150px,0,0);
+		}
+		.main.left{
+			-webkit-transform:translate3d(0,0,0);
+		}
+
+		.main.offscroll{
+			height: 100%;
+			overflow-y:hidden;
+		}
+
+
+
+		.main-center{
+			text-align: center;
+		}
+
+		.main-login{
+			position: absolute;
+			left: 10px;
+			top:22px;
+			width: 50px;
+			height: 50px;
+			background-color: red;
+			border-radius: 50px;
+			z-index: 10;
+		}
+
+		.mask{
+			display: none;
+			position: fixed;
+			top:0;
+			left:0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0,0,0,0.7);
+			z-index: 100;
+		}
+
+		.game-item{
+			display: block;
+			height: 30px;
+			margin-bottom: 5px;
+			background-color: green;
+			opacity: 0.4;
+		}
+
+		.center-item{
+			height: 30px;
+			margin-bottom: 5px;
+			background-color: red;
+			opacity: 0.4;
+		}
+
+		.game-list{
+			margin-top: 120px;
+		}
+
+		.center-wrap{
+			overflow-y:auto; 
+		}
+	</style>
+</head>
+<body>
+	<div class="center" id="center">
+		<div class="center-header">个人中心</div>
+		<div id="center-wrap" class="center-wrap"></div>
+	</div>
+	<div class="main" id="main">
+		<div class="main-center">猎豹游戏</div>
+		<div class="main-login" id="main-login"></div>
+		<div class="game-list" id="game-list"></div>
+		<div class="mask" id="mask"></div>
+	</div>
+	
+</body>
+<script>
+	var oCenter = document.getElementById('center');
+	var oCenterWrap = document.getElementById('center-wrap');
+	var oMain = document.getElementById('main');
+	var oMainLogin = document.getElementById('main-login');
+	var gameList = document.getElementById('game-list');
+	var oMask = document.getElementById('mask');
+	function getInnerWidth(){
+	    return window.innerWidth || document.documentElement.clientWidth ||document.body.clientWidth;
+	}
+
+	function getInnerHeight(){
+	    return window.innerHeight ||document.documentElement.clientHeight || documentoc.body.clientHeight;
+	}
+
+	function stopPropagation(e){
+	    if(e.stopPropagation){
+	        e.stopPropagation();
+	    }else{
+	        e.cancelBubble = true;
+	    }
+	}
+
+	function preventDefault(e){
+	    if(e.preventDefault){
+	        e.preventDefault();
+	    }else{
+	        e.returnValue = false;
+	    }
+	}
+
+	for(var i=0;i<30;i++){
+		var div = document.createElement('div');
+		div.className = 'center-item';
+		oCenterWrap.appendChild(div);
+	}
+
+	for(var i=0;i<30;i++){
+		var a = document.createElement('a');
+		a.className = 'game-item';
+		gameList.appendChild(a);
+	}
+
+	oCenterWrap.style.maxHeight = getInnerHeight() - 30 + 'px';
+
+	// function slideRight(){
+	// 	setTimeout(function(){
+	// 		oMask.style.display = 'block';
+	// 	},1000);
+	// 	oMain.style.webkitTransform = 'translate3d('+ (getInnerWidth()*0.4) +'px,0,0)';
+		
+	// }
+
+	// function slideLeft(){
+	// 	setTimeout(function(){
+	// 		oMask.style.display = 'none';
+	// 	},1000);
+	// 	oMain.style.webkitTransform = 'translate3d(0,0,0)';
+	// }
+
+	function slideRight(e){
+		//stopPropagation(e);
+		//alert(1)
+		//oCenter.style.display = 'block';
+		oCenter.className = 'center on';
+		setTimeout(function(){
+			oMask.style.display = 'block';
+		},500);
+		//alert(getInnerHeight())
+		oMain.className = 'main right offscroll';
+		
+		
+	}
+
+	function slideLeft(e){
+		//stopPropagation(e);
+		//oCenter.style.display = 'none';
+		oCenter.className = 'center';
+		setTimeout(function(){
+			
+			oMask.style.display = 'none';
+			oMain.className = 'main';
+			
+		},500);
+		oMain.className = 'main left offscroll';
+		
+		
+	}
+
+
+	oMainLogin.addEventListener('touchstart',slideRight,false);
+	oMask.addEventListener('click',slideLeft,false);
+	
+
+</script>
+</html>

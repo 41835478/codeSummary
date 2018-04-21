@@ -1,0 +1,35 @@
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		*{
+			margin: 0;
+			padding: 0;
+		}
+	</style>
+	<meta charset="utf-8">
+</head>
+<body>
+	<canvas id="cas" width="500" height="500"></canvas>
+	<script type="text/javascript">
+		window.onload = function(){
+			var a = document.getElementById('cas');
+			var b = a.getContext('2d');
+
+			//b.moveTo(100,100);
+			// b.quadraticCurveTo(100,200,400,200);
+			// b.bezierCurveTo(100,300,200,400,400,300);
+			//b.arc(100,100,50,0,Math.PI*3/2,false);
+			//b.moveTo(20,20);           // 创建开始点
+			//b.lineTo(100,20);          // 创建水平线
+			//b.arcTo(150,20,150,70,50); // 创建弧
+			//b.lineTo(150,120); 
+			b.rect(100,100,100,100);
+			if(b.isPointInPath(23,123)){
+				b.stroke();	
+			}
+			
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>测试页面</title>
+<style type="text/css">
+* { margin:0; padding:0;}
+.pr { position:relative;}
+.pa { position:absolute;}
+.fl { float:left; display:inline-block;}
+.fr { float:right; display:inline-block;}
+.cl:after { display:block; clear:both; height:0; overflow:hidden; visibility:hidden; content:".";}
+.cl { clear:both; *zoom:1;}
+ul,li { list-style:none;}
+
+
+.ddiv { width:100%; max-width:526px; margin:0 auto; overflow:hidden;}
+.ddiv ul { top:0; left:0;}
+.ddiv li { float:left;}
+.ddiv li a,.ddiv li img { display:block; width:100%; max-width:526px; overflow:hidden;}
+
+
+</style>
+</head>
+
+<body>
+<div id="ddiv" class="pr ddiv">
+    <ul class="pr cl">
+        <li><a href="javascript:void(0);"><img src="http://www.qins.com/uploadfiles/bigeyes/13944479410.jpg" /></a></li>
+        <li><a href="javascript:void(0);"><img src="http://www.qins.com/uploadfiles/bigeyes/13921021810.png" /></a></li>
+        <li><a href="javascript:void(0);"><img src="http://www.qins.com/uploadfiles/bigeyes/13958046800.jpg"></a></li>
+        <li><a href="javascript:void(0);"><img src="http://www.qins.com/uploadfiles/13879435381.jpg"></a></li>
+        <li><a href="javascript:void(0);"><img src="http://www.qins.com/uploadfiles/bigeyes/13894255380.jpg"></a></li>
+    </ul>
+</div>
+<div id="txt1"></div>
+<div id="txt2"></div>
+<div id="txt3"></div>
+<!-- <div id="inp" style=" width:100%;">2</div> -->
+<!--xiaomi width 360-->
+<script>
+window.requestAnimationFrame = (function(){
+    return  window.requestAnimationFrame ||
+            window.webkitRequestAnimationFrame ||
+            window.mozRequestAnimationFrame ||
+            function(callback){
+                window.setTimeout(callback, 16);
+            };
+})();
+
+var getCss = function(obj,attr){
+    return obj.currentStyle ? obj.currentStyle[attr] : getComputedStyle(obj, null)[attr];
+}
+var getWidth = function(elem){
+    var box = elem.getBoundingClientRect();
+    return box.width || (box.right - box.left);        
+}
+var index = function(self,obj){  
+
+    for(var i=0;i < obj.length;i++){
+        if(obj[i]==self) return i;
+    }
+}
+var animate = function(t,b,c,d){//缓动效果计算公式
+    return -c * ((t=t/d-1)*t*t*t - 1) + b;
+}
+        
+var ddiv = document.getElementById("ddiv");
+var ddUl = ddiv.getElementsByTagName("ul");
+var ddli = ddiv.getElementsByTagName("li");
+
+var li_Num = ddli.length,
+    ddiv_width = 0,
+    maxLeft = 0,
+    minLeft = 0,
+    touch_Num = 0;
+
+function winResize_Change(){
+    ddiv_width = getWidth(ddiv);
+    for(var i = 0; i < li_Num;i++){
+        ddli[i].style.width = ddiv_width + "px";
+    }
+    ddUl[0].style.width = ddiv_width * li_Num + "px";
+    ddUl[0].style.left = -ddiv_width*touch_Num + "px";
+    minLeft = ddiv_width * (1-li_Num);//-1280
+}
+
+winResize_Change();
+window.onresize = function(){
+    winResize_Change();
+}
+
+// var oInp = document.getElementById("inp");
+
+function range(num, max,min){ 
+    return Math.min( max, Math.max( num,min ) ); 
+} 
+
+// ddiv.ontouchstart = function(){
+//     ddiv_Touch(ddUl[0],event);
+// };
+
+ddiv.addEventListener('touchstart',function(){
+    ddiv_Touch(ddUl[0],event);
+},false);
+        
+function ddiv_Touch(obj,event){
+    var nowLeft = parseFloat(getCss(obj,"left"));
+    var jj = document.getElementById('txt1');
+    jj.innerHTML = 'txt1 ' + nowLeft;
+    var startX = event.targetTouches[0].clientX;
+    var deltaX = startX - nowLeft;
+    document.addEventListener("touchmove", ddiv_Move, false);
+    document.addEventListener("touchend", ddiv_End, false);
+    event.stopPropagation();//阻止冒泡
+    event.preventDefault();//取消事件的默认动作
+        
+    function ddiv_Move(e){
+        var moveX = e.targetTouches[0].clientX;
+        var left = moveX - deltaX;
+        //alert(left)
+        obj.style.left = left + "px";
+        e.stopPropagation();
+    }
+
+    function goLeft(num){
+        var start = +new Date(),
+            nowLeft = parseFloat(getCss(obj,"left")),//松手后ul的left
+            change = num - nowLeft,
+            time = range(Math.abs(change),600,200);
+            //alert(nowLeft)
+            //alert(num)
+            // oInp.innerHTML += time+",";
+            var mm = document.getElementById('txt3');
+                mm.innerHTML = 'txt3' + nowLeft;
+        var run = function(){
+            var now = +new Date(),
+                begin = now -start;
+                //alert(begin)//0 ,600
+                //alert(time)//200
+            if(begin<time){//先执行if后执行else,最终还是回归到整数,newLeft是
+                var newLeft = animate(begin,nowLeft,change,time);
+                //alert(newLeft)
+                obj.style.left = newLeft +"px";
+                //alert(10);
+                requestAnimationFrame(run);
+            }else{
+                //alert(num);
+                obj.style.left = num + "px";
+            }
+        }
+        run();
+    }
+    
+    function ddiv_End(e){
+        document.removeEventListener("touchmove", ddiv_Move, false);
+        document.removeEventListener("touchend", ddiv_End, false);
+        e.stopPropagation();
+        
+        nowLeft = parseFloat(getCss(obj,"left"));//obj为ul,ul的left
+        var kk = document.getElementById('txt2');
+        kk.innerHTML = 'txt2' + nowLeft;
+        //alert(maxLeft)//0
+        //alert(minLeft)//-1440
+        if(nowLeft > maxLeft){
+            goLeft(maxLeft);
+            return;
+        }
+        if(nowLeft < minLeft){
+            goLeft(minLeft);
+            return;
+        }
+                
+        var touchEobj = e.target;
+        //alert(touchEobj)//img
+        //alert(obj.getElementsByTagName(touchEobj.nodeName).length)
+        var touch_Num = index(touchEobj,obj.getElementsByTagName(touchEobj.nodeName));//obj为ul
+        var endX = e.changedTouches[0].clientX;
+        var offset = Math.round(endX - startX),
+            offsetOff = Math.abs(offset);
+            zf = offsetOff/offset;
+
+        if(offsetOff > 50){//判断偏移量        
+            //alert(zf)//向右是1，向左是-1
+            zf > 0 ? goLeft(-(touch_Num - 1)*ddiv_width) : goLeft(-(touch_Num + 1)*ddiv_width);//偏移了
+        }else{
+            goLeft(-touch_Num*ddiv_width);//没偏移
+        }
+    }
+}
+</script>
+</body>
+</html>

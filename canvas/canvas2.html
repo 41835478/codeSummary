@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<meta charset="utf-8">
+	<style type="text/css">
+		*{
+			margin: 0;
+			padding: 0;
+		}
+
+	</style>
+</head>
+<body>
+	<img src="demo1.jpg" id="lamp"/>
+	<canvas id="cas">你的浏览器不支持</canvas>
+	<script type="text/javascript">
+	//window.onload = function(){
+
+
+	var o = document.getElementById('cas');
+	var s = o.getContext('2d');
+
+	//var m = s.createLinearGradient('100','0','150','0');
+	//var m = s.createLinearGradient(100,0,150,0);
+	//参数1：渐变开始的横坐标
+	//参数1：渐变开始的纵坐标
+	//参数1：渐变结束的横坐标
+	//参数1：渐变结束的纵坐标
+	//只要没到渐变开始的横坐标，颜色均为初始的颜色【黄色】
+	// m.addColorStop(0,'yellow');
+	// m.addColorStop(0.5,'red');
+	// m.addColorStop(1,'green');
+	// s.fillStyle = m;
+	// //s.fillRect('0','0','150','150');
+	// s.fillRect(0,0,150,150);
+	
+	var v = document.getElementById('lamp');
+	
+	var k = s.createPattern(v,'repeat-y');
+
+	s.fillStyle = k;
+	
+	s.fillRect(0,0,160,150);
+	//}
+	
+	
+
+
+</script>
+</body>
+
+</html>

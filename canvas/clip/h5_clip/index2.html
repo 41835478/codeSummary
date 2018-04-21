@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+	<title></title>
+	<script src="../js/jquery.js"></script>
+	<style>
+		*{
+			margin: 0;
+			padding: 0;
+		}
+
+		html,body{
+			width: 100%;
+			height: 100%;
+			overflow: hidden;
+		}
+
+
+		.preview_wrap{
+			width: 300px;
+			height: 400px;
+			margin: 0 auto;
+		}
+
+		#preview{
+			width: 300px;
+			height: 400px;
+		}
+
+		.demo_img{
+			width: 100px;
+			height: 100px;
+		}
+
+		.demo_small_wrap{
+			position: absolute;
+			left:0;
+			top:0;
+		}
+
+		/*.demo_small{
+			width: 100px;
+			height: 100px;
+		}*/
+
+		.resize-container {
+		    position: relative;
+		    display: inline-block;
+		    cursor: move;
+		    margin: 0 auto;
+		}
+		.resize-container img {
+		    display: block;
+		}
+
+		.resize-handle-ne,
+		.resize-handle-se,
+		.resize-handle-nw,
+		.resize-handle-sw {
+		    position: absolute;
+		    display: block;
+		    width: 10px;
+		    height: 10px;
+		    background: rgba(222, 60, 80, .9);
+		    z-index: 999;
+		}
+		.resize-handle-nw {
+		    top: -5px;
+		    left: -5px;
+		    cursor: nw-resize;
+		}
+		.resize-handle-sw {
+		    bottom: -5px;
+		    left: -5px;
+		    cursor: sw-resize;
+		}
+		.resize-handle-ne {
+		    top: -5px;
+		    right: -5px;
+		    cursor: ne-resize;
+		}
+		.resize-handle-se {
+		    bottom: -5px;
+		    right: -5px;
+		    cursor: se-resize;
+		}
+
+	</style>
+</head>
+<body>
+	<div class="clip_wrap">
+		<div class="preview_wrap">
+			<img src="" id="preview">
+		</div>
+		<input type="file" id="image_file" accept="image/*" onchange="fileSelected();"><br><br><br>
+
+		<!-- <img src="http://img3.imgtn.bdimg.com/it/u=1607080888,4006630485&fm=21&gp=0.jpg" class="demo_img">
+		<img src="http://pic.58pic.com/58pic/15/41/10/65Q58PIC6nu_1024.png" class="demo_img"> -->
+		<img src="../img/sun.jpg" class="demo_img" id="demo_img_1">
+		<img src="../img/eyes.png" class="demo_img" id="demo_img_2">
+		<br>
+		<br>
+		<input type="button" id="clip" value="生成">
+	</div>
+	<script>
+
+	var resize_canvas;
+	var orig_src;
+	var constrain = false;
+	var min_width = 60;
+    var min_height = 60;
+    var max_width = 800;
+    var max_height = 900;
+	function fileSelected(){
+
+		var oImage = $("#preview");
+		var $container;
+		
+
+		var oFile = $("#image_file").get(0).files[0];
+
+		var oReader = new FileReader();
+        oReader.onload = function(e){
+	        oImage.attr('src',e.target.result);	 
+
+	      	draw(oImage);
+
+	    }
+
+    	oReader.readAsDataURL(oFile);
+
+    	function draw(target_img){
+    		$(target_img).wrap('<div class="resize-container"></div>');
+    		$container = $('.resize-container');
+
+    		//$container.on('mousedown touchstart', 'img', startMoving);
+
+    	}
+
+    	var event_state;
+
+    	function saveEventState(e) {
+    		event_state = {};
+    		var tar = e.target;
+    		var demo_parent = $(tar).parent('.demo_small_wrap');
+
+    		//console.log(demo_parent)
+
+	        event_state.container_width = demo_parent.width();//图片容器的宽度
+	        event_state.container_height = demo_parent.height();//图片容器的高度
+	        event_state.container_left = demo_parent.offset().left;//图片容器的left
+	        event_state.container_top = demo_parent.offset().top;//图片容器的top
+
+
+	        /*小图的动作数据*/
+
+
+	        event_state.mouse_x = (e.clientX || e.pageX || e.originalEvent.touches[0].clientX) + $(window).scrollLeft();
+	        //点击点的left
+	        event_state.mouse_y = (e.clientY || e.pageY || e.originalEvent.touches[0].clientY) + $(window).scrollTop();
+	        //点击点的top
+	        if (typeof e.originalEvent.touches !== 'undefined') {
+	            event_state.touches = [];
+	            $.each(e.originalEvent.touches, function(i, ob) {
+	                event_state.touches[i] = {};
+	                event_state.touches[i].clientX = 0 + ob.clientX;
+	                event_state.touches[i].clientY = 0 + ob.clientY;
+	            });
+	        }
+	        event_state.evnt = e;
+
+	        //console.log(event_state)
+	    };
+
+    	function startMoving(e){
+    		//console.log(e)
+    		orig_src.src = e.target.src;
+    		e.preventDefault();
+	        e.stopPropagation();
+	        saveEventState(e);
+	        $(document).on('mousemove touchmove', moving);
+	        $(document).on('mouseup touchend', endMoving);
+    	}
+
+    	function endMoving(e) {
+	        e.preventDefault();
+	        $(document).off('mouseup touchend', endMoving);
+	        $(document).off('mousemove touchmove', moving);
+	    };
+
+    	function moving(e){
+    		var target = e.target;
+	        var mouse = {},
+	            touches;
+	        e.preventDefault();
+	        e.stopPropagation();
+	        touches = e.originalEvent.touches;
+	        mouse.x = (e.clientX || e.pageX || touches[0].clientX) + $(window).scrollLeft();//鼠标坐标x距离最左边
+	        mouse.y = (e.clientY || e.pageY || touches[0].clientY) + $(window).scrollTop();//鼠标坐标y距离最上边
+	        
+	        $(target).parent('.demo_small_wrap').offset({
+	            'left': mouse.x - (event_state.mouse_x - event_state.container_left),
+	            'top': mouse.y - (event_state.mouse_y - event_state.container_top)
+	        });
+
+    	}
+
+
+
+
+
+
+
+    
+
+	    //var canvas_merge = document.createElement('canvas');
+	    //var canvas_merge_2d = canvas_merge.getContext('2d');
+
+	    $('.demo_img').on('click',function(e){
+	    	
+	    	var target = e.target;
+	    	var targetId = $(target).attr('id');
+	    	var initSrc = target.src;
+	    	var insertImg = $("<img class='demo_small' src="+ initSrc +">");
+	    	resize_canvas = document.createElement('canvas');
+	    	
+	    	$('.resize-container').append(insertImg);
+	    	insertImg.wrap('<div class="demo_small_wrap" id="wrap_'+ targetId +'"></div>')
+	    			.before('<span class="resize-handle resize-handle-nw"></span>')
+		            .before('<span class="resize-handle resize-handle-ne"></span>')
+		            .after('<span class="resize-handle resize-handle-se"></span>')
+		            .after('<span class="resize-handle resize-handle-sw"></span>');
+
+	    	orig_src = new Image();
+	    	orig_src.src = initSrc;
+
+
+
+
+	    });
+
+	    
+
+	    $(document).on('mousedown touchstart', '.demo_small', startMoving);
+
+	    $(document).on('mousedown touchstart', '.resize-handle', startResize);
+
+
+	    function startResize(e){
+	    	var tar = e.target;
+	    	var redirectTar = $(tar).parent('.demo_small_wrap').find('.demo_small').attr('src');
+	    	
+	    	orig_src.src = redirectTar;
+	    	
+	    	e.preventDefault();
+	        e.stopPropagation();
+	        saveEventState(e);
+	        $(document).on('mousemove touchmove', resizing);
+	        $(document).on('mouseup touchend', endResize);
+	    }
+
+	    function resizing(e){
+	    	
+	    	var tar = e.target;
+	    	var resizingTargetPar = $(tar).parent('.demo_small_wrap');
+	    	
+	    	var mouse = {},
+		        width, height, left, top, offset = resizingTargetPar.offset();
+		        mouse.x = (e.clientX || e.pageX || e.originalEvent.touches[0].clientX) + $(window).scrollLeft();
+		        mouse.y = (e.clientY || e.pageY || e.originalEvent.touches[0].clientY) + $(window).scrollTop();
+
+		        
+		        if ($(event_state.evnt.target).hasClass('resize-handle-se')) {
+		            width = mouse.x - event_state.container_left;
+		            height = mouse.y - event_state.container_top;
+		            left = event_state.container_left;
+		            top = event_state.container_top;
+
+		            console.log('右下');
+		            
+
+		        } else if ($(event_state.evnt.target).hasClass('resize-handle-sw')) {
+		            width = event_state.container_width - (mouse.x - event_state.container_left);
+		            height = mouse.y - event_state.container_top;
+		            left = mouse.x;
+		            top = event_state.container_top;
+
+		            console.log('左下')
+		        } else if ($(event_state.evnt.target).hasClass('resize-handle-nw')) {
+		            width = event_state.container_width - (mouse.x - event_state.container_left);
+		            height = event_state.container_height - (mouse.y - event_state.container_top);
+		            left = mouse.x;
+		            top = mouse.y;
+		            if (constrain || e.shiftKey) {
+		                top = mouse.y - ((width / orig_src.width * orig_src.height) - height);
+		            }
+
+		            console.log('左上')
+		        } else if ($(event_state.evnt.target).hasClass('resize-handle-ne')) {
+		            width = mouse.x - event_state.container_left;
+		            height = event_state.container_height - (mouse.y - event_state.container_top);
+		            left = event_state.container_left;
+		            top = mouse.y;
+		            if (constrain || e.shiftKey) {
+		                top = mouse.y - ((width / orig_src.width * orig_src.height) - height);
+		            }
+
+		            console.log('右上')
+		        }
+
+		        
+		        // if (constrain || e.shiftKey) {
+		        //     height = width / orig_src.width * orig_src.height;
+		        // }
+
+		        
+
+		        if (width > min_width && height > min_height && width < max_width && height < max_height) {
+		            
+
+		            resizeImage(width, height,e);
+		            
+		            resizingTargetPar.offset({
+		                'left': left,
+		                'top': top
+		            });
+		        }
+	    }
+
+	    function endResize(e){
+	        e.preventDefault();
+	        $(document).off('mouseup touchend', endResize);
+	        $(document).off('mousemove touchmove', resizing);
+	    }
+
+	    function resizeImage(width, height,e) {
+	    	var target = $(e.target).parent('.demo_small_wrap').find('.demo_small');
+	    	
+	        resize_canvas.width = width;
+	        resize_canvas.height = height;
+	        resize_canvas.getContext('2d').drawImage(orig_src, 0, 0, width, height);
+	        
+	        target.attr('src', resize_canvas.toDataURL("image/png"));
+	    };
+
+	    
+
+	    $("#clip").on('click',function(e){//生成
+
+	    	//取数据	
+	    	var previewDataArr = [];
+	    	var previewDataObj;
+	    	
+	    	var oPreviewSrc = $("#preview").attr('src');
+
+	    	if(oPreviewSrc != ''){
+	    		previewDataObj = {};
+	    		
+	    		previewDataObj['id'] = 'preview';
+	    		previewDataObj['url'] = oPreviewSrc;
+	    		previewDataObj['width'] = $("#preview").width();
+	    		previewDataObj['height'] = $("#preview").height();
+	    		//previewDataObj['left'] = $("#preview").offset().left;
+	    		previewDataObj['left'] = 0;
+	    		//previewDataObj['top'] = $("#preview").offset().top;
+	    		previewDataObj['top'] = 0;
+
+	    		previewDataArr.push(previewDataObj);
+	    	}
+
+	    	if($(".demo_small_wrap").length>0){
+
+	    		var  clip_demo_small_wrap = $(".demo_small_wrap");
+		    	$.each(clip_demo_small_wrap,function(i,v){
+		    		previewDataObj = {};
+
+		    		previewDataObj['id'] = $(v).attr('id');
+		    		previewDataObj['url'] = $(v).find('.demo_small').attr('src');
+	    			previewDataObj['width'] = $(v).width();
+	    			previewDataObj['height'] = $(v).height();
+	    			previewDataObj['left'] = $(v).offset().left - $("#preview").offset().left;
+	    			previewDataObj['top'] = $(v).offset().top - $("#preview").offset().top;
+	    			
+
+	    			previewDataArr.push(previewDataObj);
+
+		    	});
+	    	}
+
+
+	    	console.log(previewDataArr)
+
+
+
+
+
+	    	//return;
+
+	    	
+
+	    	
+	    	
+	    	
+
+	    	var imgDataLen = previewDataArr.length;
+
+	    	
+	    	//console.log(imgData)
+	    	var c = document.createElement('canvas'),
+					ctx = c.getContext('2d');
+				c.width=300;
+				c.height=400;
+				ctx.rect(0,0,c.width,c.height);
+				ctx.fillStyle='#fff';
+				ctx.fill();
+
+	    	function drawing(n){
+	    		
+
+				if(n<imgDataLen){
+				//if(n<1){
+					var img = new Image;
+					//img.crossOrigin = 'Anonymous'; //解决跨域
+					img.src = previewDataArr[n]['url'];
+					img.onload = function(){
+						
+						var left = previewDataArr[n]['left'];
+						var top = previewDataArr[n]['top'];
+						var width = previewDataArr[n]['width'];
+						var height = previewDataArr[n]['height'];
+
+						console.log('left',left);
+						console.log('top',top);
+						console.log('width',width);
+						console.log('height',height);
+
+						
+						
+							
+						
+						ctx.drawImage(img ,left, top, width, height);
+						
+						
+						
+						drawing(n+1);//递归
+					}
+				}else{
+					//保存生成作品图片
+					var fin = c.toDataURL("image/jpeg");
+					window.open(fin);
+				}
+			}
+			drawing(0);
+	    });
+
+    }
+
+	</script>
+</body>
+</html>

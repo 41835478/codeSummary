@@ -1,0 +1,57 @@
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+	<script type="text/javascript">
+	/*
+		? 0次或1次
+		* 0次以上
+		+ 1次以上
+	*/
+		// var re = /<.*>/;
+		// var str = '<h1>这是标题</h1>';
+
+		// var f = str.match(re);
+		// console.log(f)
+
+		// var re2 = /12?/g;
+		// var str2 = '1 or 12 or 122 or 124';
+
+		// var g = str2.match(re2);
+		// console.log(g)//[1,12,12,12]
+
+		// var re3 = /he*/g;
+		// var str3 = 'hello or hee or heeeeee';
+
+		// var h = str3.match(re3);
+		// console.log(h)
+
+
+		// var re4 = /c.t/g;
+		// var str4 = 'car or cat of c1t or c>t or c{t c///t';
+
+		// var q = str4.match(re4);
+		// console.log(q)
+
+		// var str5 = 'http://www.liebao.cn?from=legoBtn';
+		// //var str6 = 'www.liebao.cn?from=legoBtn';
+		// //var str7 = 'www.liebao.cn?from=ext';
+
+		// var re5 = /(http:\/\/)?www\.liebao\.cn?/;
+
+		// var a1 = re5.test(str5);
+		// //var a2 = re5.test(str6);
+		// //var a3 = re5.test(str7);
+		// console.log(a1)
+		//console.log(a2)
+		//console.log(a3)
+
+		var str8 = '汉字';
+		var re8 = /[\u4E00-\u9FA5]/g;
+		var j = str8.match(re8);
+
+		console.log(j)
+	</script>
+</body>
+</html>

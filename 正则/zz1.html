@@ -1,0 +1,25 @@
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+	<script type="text/javascript">
+		var zz = new RegExp('e');
+		var a1 = zz.test('hello');//如果字符串中含有e模式，返回true
+		var a2 = zz.test('hllo');
+		//test方法返回布尔值
+		console.log(a1)//true
+		console.log(a2)//false
+
+
+		var b1 = zz.exec('hello');
+		var b2 = zz.exec('hllo');
+		//检索字符串的指定值，检测到了，返回指定值，返回不到为null
+		console.log(b1)//["e", index: 1, input: "hello"]
+		console.log(b2)//null
+
+		//正则表达式对象的第二个参数为
+
+	</script>
+</body>
+</html>

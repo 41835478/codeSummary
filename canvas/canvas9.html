@@ -1,0 +1,40 @@
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		*{
+			margin:0;
+			padding: 0;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="cas" width="500" height="500"></canvas>
+	<br/>
+	<img src="demo2.png" id="gg" width="30" height="30">
+
+</body>
+<script type="text/javascript">
+	window.onload = function(){
+		var a = document.getElementById('cas');
+		var b = a.getContext('2d');
+
+		//b.font = '30px Georgia';
+		//b.fillText('hello',100,100);	
+		//b.strokeStyle = 'red'
+		//b.strokeText('world',200,200);
+
+		//var str = 'kingchen';
+
+		//b.fillText('width:'+b.measureText(str).width,100,100);
+		//b.fillText(str,100,200);
+
+		var k = document.getElementById('gg');
+		b.drawImage(k,100,100);
+		b.drawImage(k,100,300,150,150);
+		b.drawImage(k,30,30,20,20,300,400,200,200);
+
+	}
+	
+</script>
+</html>

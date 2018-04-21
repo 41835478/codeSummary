@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<style>
+		*{
+			margin: 0;
+			padding: 0;
+		}
+		body{
+			background-color: #ddd;
+		}
+
+		#cas{
+			display: block;
+			margin: 10px;
+			padding: 10px;
+			background-color: #fff;
+			border: thin inset #aaa;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="cas" width="600" height="300"></canvas>
+</body>
+<script>
+	var oCas = document.getElementById('cas');
+	var oText = oCas.getContext('2d');
+	oText.font = '30pt Arial';
+	oText.fillStyle = 'cornflowerblue';
+	oText.strokeStyle = 'blue';
+	//oText.fillText('hello canvas',oCas.width/2 - 150,oCas.height/2 + 15);
+	//oText.strokeText('hello canvas',oCas.width/2 - 150,oCas.height/2 + 15);
+	function fnn(oCas,x,y){
+		var bbox = oCas.getBoundingClientRect();
+		return {
+			x:x - bbox.left*(oCas.width/bbox.width),
+			y:y - bbox.top*(oCas.height/bbox.height)
+		}
+	}	
+
+	function toTranslate(e){
+		var s = fnn(oCas,e.clientX,e.clientY);
+		console.log(s)
+	}
+
+
+
+	oCas.addEventListener('mousedown',toTranslate,false);
+
+</script>
+</html>

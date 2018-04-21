@@ -1,0 +1,39 @@
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		*{
+			margin: 0;
+			padding: 0;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="cas" width="600" height="600"></canvas>
+	<script type="text/javascript">
+		window.onload = function(){
+			var a = document.getElementById('cas');
+			var b = a.getContext('2d');
+
+			// b.lineWidth = 10;
+			// b.strokeStyle = 'green'
+			// b.moveTo(10,10);
+			// b.lineTo(100,30);
+			// b.lineTo(20,60);
+			// b.closePath();
+			// b.fillStyle = 'red';
+			// b.stroke();
+			// b.fill();
+
+			b.strokeStyle = 'red';
+			b.rect(50,20,200,120);
+			b.stroke();
+			b.clip();
+			b.fillStyle = 'green';
+			b.fillRect(0,0,150,100);
+			// b.fill();
+		}
+
+	</script>
+</body>
+</html>

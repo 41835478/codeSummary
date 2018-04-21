@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<title>Examples</title>
+	<meta content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0,user-scalable=no" name="viewport"/>
+	<meta name="description" content="">
+	<meta name="keywords" content="">
+	<link href="" rel="stylesheet">
+</head>
+<style>
+	*{margin:0;padding: 0}
+    body{background: #222}
+    .refreshWrap{width: 100%;height: auto; background: #333;margin-top: 0px; color: #fff}
+    .refreshWrap p{ line-height: 60px;margin-bottom: 2px; background: #444;padding: 2px 5px;}
+</style>
+<body>
+<div class="refreshWrap">
+        <p>213</p><p>213</p><p>213</p><p>213</p><p>213</p><p>213</p><p>213</p><p>213</p><p>213</p><p>213</p><p>213</p><p>213</p><p>213</p><p>213</p><p>213</p><p>213</p><p>213</p><p>213</p><p>213</p><p>213</p><p>213</p><p>213</p><p>213</p><p>213</p><p>213</p>
+</div>
+</body>
+<script>
+    window.Refresh = (function(){
+    function refresh(o){
+        this.dom =( (typeof o=='object') ? o : document.querySelector(o) ) || document.body;
+        this.flag2 = true;
+        this.init();
+    };
+    refresh.prototype = {
+        init : function(){
+            this.dom.insertAdjacentHTML("afterbegin", '<div class="refresh">下拉刷新</div>');
+            this.refresh = document.querySelector('.refresh');
+            document.querySelector('head').insertAdjacentHTML("beforeend", '<style>.refresh{width: 100%;height: 70px;margin-top: -70px; line-height: 70px; text-align: center; color: #332;background: #fff;font-size:14px; position: relative; z-index: 999999}.refreshMove{transition:all 0.4s ease;-moz-transition:all 0.4s ease;-webkit-transition:all 0.4s ease;}</style>');
+            this.bind();
+        },
+        bind : function(){
+            var x = 0,x2 =0,y=0,y2=0,mousedown=false,flag = false ,_this = this;
+            var isMobile =   /mobile|touch/gi.test(navigator.userAgent.toLowerCase());
+            var events = isMobile ? {
+                down: 'touchstart',
+                move: 'touchmove',
+                up: 'touchend'
+            } : {
+                down: 'mousedown',
+                move: 'mousemove',
+                up: 'mouseup'
+            };
+            document.addEventListener(events.down,down);
+            document.addEventListener(events.up,up);
+            function down(ev){
+                if(pageYOffset==0 && _this.flag2){
+                    var _ev = isMobile ? ev.changedTouches[0] : (ev || window.event);
+                    _this.dom.classList.remove('refreshMove');
+                    x = _ev.pageX;
+                    y = _ev.pageY;
+                    _this.refresh.innerHTML = '下拉刷新';
+                    document.addEventListener(events.move,move);
+                };
+            };
+            function move(ev){
+                var _ev = isMobile ? ev.changedTouches[0] : (ev || window.event);
+                x2 = _ev.pageX;
+                y2 = _ev.pageY;
+                if( y2 > y ){
+                    _this.flag2 = false;
+                    mousedown = true;
+                    ev.preventDefault();
+                    var top =(y2 - y)/2;
+                    if(top>=70){
+                        flag = true;
+                        _this.refresh.innerHTML = '释放刷新';
+                        top =top/2 + 70/2;
+                    }else{
+                        flag = false;
+                        _this.refresh.innerHTML = '下拉刷新';
+                    };
+                    _this.dom.style['transform'] = _this.dom.style['-webkit-transform'] = 'translate3d(0,'+top+'px,0)';
+                    return false;
+                };
+             };
+            function up(){
+                document.removeEventListener(events.move,move);
+                if(mousedown){
+                    _this.dom.classList.add('refreshMove')
+                    if(flag){
+                        _this.dom.style['transform'] = _this.dom.style['-webkit-transform'] = 'translate3d(0,70px,0)';
+                        _this.refresh.innerHTML = '正在刷新';
+                        _this.startFn && _this.startFn.call(_this.refresh);
+                    }else{
+                        _this.flag2 = true
+                        _this.dom.style['transform'] = _this.dom.style['-webkit-transform'] = 'translate3d(0,0px,0)';
+                    };
+                    mousedown = false
+                    flag = false
+                };
+            };
+        },
+        start : function(fn){
+            this.startFn = fn;
+        },
+        load : function(a,b){
+            this.refresh.innerHTML = '加载成功';
+            typeof a =='function' ? ( a && a.call(this.refresh) ): (b && b.call(this.refresh) );
+            this.back(typeof a=='function' ? b : a);
+        },
+        back : function(b){
+            var _this = this;
+            setTimeout(function(){
+                _this.dom.style['transform'] = _this.dom.style['-webkit-transform'] = 'translate3d(0,0px,0)';
+                _this.transEnd();
+            },b ? b : 400);
+        },
+        transEnd : function(){
+            var _this = this;
+            _this.dom.addEventListener('webkitTransitionEnd',fn);
+            _this.dom.addEventListener('transitionend',fn);
+            function fn(){
+                _this.flag2 = true
+                _this.dom.removeAttribute('style');
+                _this.dom.classList.remove('refreshMove');
+                _this.dom.removeEventListener('webkitTransitionEnd',fn);
+                _this.dom.removeEventListener('transitionend',fn);
+            };
+        }
+    };
+    return refresh;
+})();
+    
+</script>
+
+
+<script type="text/javascript">
+window.onload = function(){
+
+var s = new Refresh('body'),timer=null;
+s.start(function(){
+    //模拟ajax请求
+    clearInterval(timer)
+    timer = setTimeout(function(){
+        s.load(500)
+    },1500)
+})
+
+}
+</script>
+</html>

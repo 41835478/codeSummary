@@ -1,0 +1,289 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+        <title></title>
+        <style>
+            html,
+            body {
+                width: 100%;
+                padding: 0px;
+                margin: 0px;
+            }
+
+            ul,li{
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            body{
+                background-color: #cbcbcb;
+            }
+
+
+
+            .menu{
+                display: none;
+                position: absolute;
+                right:0%;
+                top:45%;
+                width: 55px;
+                height: 55px;
+                background: url('../img/menu.png') no-repeat 0 0;
+                background-size: contain;
+                border-radius: 30px;
+                -webkit-transform:translate3d(0px,0,0);
+                -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+                z-index: 200;
+                -webkit-user-select: none;
+            }
+
+            .menu-wrap{
+                display: none;
+                position: absolute;
+                width: 130px;
+                z-index: 300;
+                background-color: #fff;
+                border-radius: 5px;
+                -webkit-box-shadow: 0px 0px 15px #000;
+                box-shadow: 0px 0px 15px #000;
+            }
+
+            .show{
+                display: block;
+            }
+
+            .menu-wrap ul{
+                overflow: hidden;
+            }
+
+            .menu-wrap li.common{
+                display: block;
+                height: 50px;
+                line-height: 50px;
+                text-align: center;
+                font-family:"黑体","Microsoft YaHei",Arial,Helvetica,sans-serif,"宋体";
+                font-weight: bold;
+                color:#3D3D3D;
+            }
+
+            .menu-wrap li.menu-line{
+                display: block;
+                width: 88%;
+                height: 0px;
+                border-bottom: 1px solid #8B8B8B;
+                margin: 0 auto;
+            }
+
+            .menu-wrap li.common:active{
+                background-color: #D8D8D8;
+            }
+
+            .menu-wrap li:nth-child(1){
+                border-top-left-radius: 5px;
+                border-top-right-radius: 5px;
+            }
+
+            .menu-wrap li:nth-child(3){
+                border-bottom-left-radius: 5px;
+                border-bottom-right-radius: 5px;
+            }
+
+            .menuActive{
+                background-color: #B7B7B4;
+            }
+
+            .mask{
+                display: none;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: transparent;
+                z-index: 100;
+            }
+
+        </style>
+    </head>
+    <body>
+        
+        <div id="menu" class="menu">
+            <div id="menu-wrap" class="menu-wrap" data-display='false'>
+                <ul id="menu-ul">
+                    <li data-click="create" class="common" id="tip-method">菜单1</li>
+                    <li class="menu-line"></li>
+                    <li data-click="game" class="common">菜单2</li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="mask" class="mask"></div>
+        
+        
+        
+        <script>
+            
+    
+                function stopBubble(e) {
+                    if ( e && e.stopPropagation ){
+                      //因此它支持W3C的stopPropagation()方法
+                           e.stopPropagation();
+                    } else{
+                      //否则，我们需要使用IE的方式来取消事件冒泡
+                           window.event.cancelBubble = true; //解决ie7,8
+                    }
+                 }
+
+                function stopDefault( e ) { //阻止表单输入
+                    if ( e && e.preventDefault ) {
+                          e.preventDefault(); //chrome,ff
+                    } else{
+                          //IE中阻止函数器默认动作的方式
+                          window.event.returnValue = false;
+                    }
+                         
+                    return false;
+                }
+
+                function getX(e){
+                    return e.touches ? e.touches[0].clientX : e.clientX;
+                }
+
+                function getY(e){
+                    return e.touches ? e.touches[0].clientY : e.clientY;
+                }
+
+            
+
+                (function(){
+
+                    function setPx(obj,property,value){
+                        return obj.style[property] = value + 'px';
+                    }
+
+                    function clearStyle(obj){
+                        return obj.style.cssText  = '';
+                    }
+
+                    var menuWrap = document.getElementById('menu-wrap');
+                    var oMenu = document.getElementById('menu');
+                    var oMask = document.getElementById('mask');
+                    oMenu.style.display = 'block';
+                    
+                    var menuDisW = document.documentElement.clientWidth - oMenu.offsetWidth;
+                    var menuDisH = document.documentElement.clientHeight - oMenu.offsetHeight;
+                    
+                    var oMenuW = oMenu.offsetWidth;
+                    var oMenuH = oMenu.offsetHeight;
+                    var state = 0;
+
+                    function st(e){
+                        state = 1;
+                        stopBubble(e);
+                        var startX = parseInt(getX(e));
+                        var startY = parseInt(getY(e));
+                        var objX = oMenu.offsetLeft;
+                        var objY = oMenu.offsetTop;
+                        var disX = startX - objX;
+                        var disY = startY - objY;
+
+                        oMenu.className = 'menu menuActive';
+
+                        function move(e){
+                            stopDefault(e);
+                            var nowX = parseInt(getX(e));
+                            var nowY = parseInt(getY(e));
+                            var moveNowLeft = nowX - disX;
+                            var moveNowTop = nowY - disY;
+
+                            var moveX = Math.abs(nowX - startX);
+                            var moveY = Math.abs(nowY - startY);
+                            
+                            if(moveX > 10 || moveY>10){
+                                state = 2;
+                            }else{
+                                state = 1;
+                            }
+                            
+
+                            if(menuWrap.getAttribute('data-display') == 'false'){//只是menu
+                                if(moveNowLeft < 0){
+                                    moveNowLeft = 0;
+                                }else if(moveNowLeft > menuDisW){
+                                    moveNowLeft = menuDisW;
+                                }
+                                
+                                if(moveNowTop < 0){
+                                    moveNowTop = 0;
+                                }else if(moveNowTop > menuDisH){
+                                    moveNowTop = menuDisH;
+                                }
+                            }else{
+                                return;
+                            }
+
+                            setPx(oMenu,'left',moveNowLeft);
+                            setPx(oMenu,'top',moveNowTop);
+                        }
+
+                        oMenu.addEventListener('touchmove',move,false);
+                        oMenu.addEventListener('touchend',function end(e){
+                            if(state == 1){//菜单
+                                scl(e);
+                            }
+
+                            oMenu.className = 'menu';
+                            oMenu.removeEventListener('touchmove',move,false);
+                            oMenu.removeEventListener('touchend',end,false);
+                        },false);
+                    }
+
+                    oMenu.addEventListener('touchstart',st,false);
+
+                    function scl(e){
+                        
+                        clearStyle(menuWrap);
+                        if(oMenu.offsetLeft > menuDisW/2){
+                            setPx(menuWrap,'right',10);
+                        }else{
+                            setPx(menuWrap,'left',10);
+                        }
+                        
+                        if(oMenu.offsetTop > menuDisH/2){
+                            setPx(menuWrap,'bottom',10);
+                        }else{
+                            setPx(menuWrap,'top',10);
+                        } 
+
+                        setTimeout(function(){
+                            if(e.target.id == 'menu'){
+                                oMask.style.display = 'block';
+                                menuWrap.className = 'menu-wrap show';
+                                menuWrap.setAttribute('data-display',true);
+                                
+                            }else{
+                                oMask.style.display = 'none';
+                                menuWrap.className = 'menu-wrap';
+                                menuWrap.setAttribute('data-display',false);
+                            }
+                        },100);
+                        
+                    }
+
+                    document.addEventListener('touchstart',function(e){
+                        setTimeout(function(){
+                            oMask.style.display = 'none';
+                            menuWrap.className = 'menu-wrap';
+                            menuWrap.setAttribute('data-display',false);
+                        },300)
+                        
+                    },false);
+
+                })();
+
+        </script>
+    </body>
+</html>

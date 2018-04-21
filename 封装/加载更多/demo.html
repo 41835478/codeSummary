@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title></title>
+    <style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+    
+    ul,
+    li {
+        list-style: none;
+    }
+    
+    li {
+        height: 30px;
+        background-color: #eee;
+        margin-bottom: 20px;
+    }
+    </style>
+</head>
+
+<body>
+    <ul class="list">
+        <li>1231312313</li>
+        <li>1231312313</li>
+        <li>1231312313</li>
+        <li>1231312313</li>
+        <li>1231312313</li>
+        <li>1231312313</li>
+        <li>1231312313</li>
+        <li>1231312313</li>
+        <li>1231312313</li>
+        <li>1231312313</li>
+        <li>1231312313</li>
+        <li>1231312313</li>
+        <li>1231312313</li>
+        <li>1231312313</li>
+        <li>1231312313</li>
+        <li>1231312313</li>
+        <li>1231312313</li>
+        <li>1231312313</li>
+        <li>1231312313</li>
+        <li>1231312313</li>
+        <li>1231312313</li>
+        <li>1231312313</li>
+        <li>1231312313</li>
+        <li>1231312313</li>
+    </ul>
+</body>
+<script>
+
+
+function ajax(setting) {
+    if (window.XMLHttpRequest)
+        xhr = new XMLHttpRequest();
+    else {
+        xhr = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4) {
+            if (xhr.status == 200) {
+                if (setting.success)
+                    setting.success(xhr.responseText);
+                else
+                    console.log(xhr.responseText);
+            } else {
+                if (setting.error)
+                    setting.error(xhr.status);
+                else {
+                    console.log('Error:' + xhr.status);
+                }
+            }
+        }
+    }
+
+    var data = "";
+    if (typeof setting.data === 'string') {
+        data = setting.data;
+        if (data.charAt(0) == '?')
+            data = data.substring(1, data.length);
+    } else if (typeof setting.data == 'object') {
+        for (key in setting.data) {
+            data += key + '=' + setting.data[key] + '&';
+        }
+        data = data.replace(/&$/, '');
+    }
+
+    var type = setting.type || 'GET';
+
+    if (type == 'GET') { //GET方式提交
+        xhr.open(type, setting.url + '?' + data, true);
+        xhr.send();
+    } else { //POST方式提交
+        xhr.open(type, setting.url, true);
+        xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhr.send(data);
+    }
+}
+
+
+
+
+var offset = 0;
+var limit = 20;
+var hasMore = 1;
+var isLoading = 0;
+
+var hot = 'http://api.theme.cmcm.com/rank/hot'
+
+function loadMore() {
+
+    if (isLoading || !hasMore) {
+        return
+    } else {
+        isLoading = 1;
+    }
+
+    // Ajax({
+    //     url: hot,
+    //     data: {
+    //         offset: offset,
+    //         limit: limit
+    //     },
+    //     success: function(data) {
+    //         var _data = JSON.parse(data);
+    //         isLoading = 0;
+    //         if (_data.ret == 1) {
+    //             // self.setState({
+    //             //     data: self.state.data.concat(_data.data),
+    //             //     hasMore: _data.hasMore,
+    //             //     offset: _data.data.length + self.state.offset,
+    //             //     state: 'done'
+    //             // });
+    //         } 
+    //     },
+    //     error: function(e) {
+            
+    //     }
+    // })
+
+    ajax({
+        type: 'get',
+        url: hot + '?offset='+ offset +'&limit=' + limit,
+        success: function(data) {
+            //console.log(data)
+            //更改hasmore状态和偏移量状态
+        },
+        error: function(data) {
+            console.log('Error:' + data);
+        }
+    });
+}
+
+
+var toScroll;
+
+
+
+function clubOnScroll() {
+
+    var body = document.body;
+    var scrollTop = body.scrollTop;
+    var bodyH = body.clientHeight;
+    var winH = window.document.documentElement.clientHeight;
+    //console.log('scrollTop',scrollTop)
+    //console.log('winH',winH)//640
+    //console.log('bodyH',bodyH)
+
+    var isBot = bodyH - scrollTop - winH;
+
+    console.log(isBot)
+    if (isBot <= 0) {
+        loadMore();
+    }
+
+
+}
+
+
+if ("ontouchmove" in document) {
+    window.addEventListener('touchmove', function() {
+        clearTimeout(toScroll);
+        toScroll = setTimeout(clubOnScroll, 100);
+    });
+
+} else {
+    window.addEventListener('scroll', clubOnScroll);
+}
+</script>
+
+</html>

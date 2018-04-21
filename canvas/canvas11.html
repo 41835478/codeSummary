@@ -1,0 +1,28 @@
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		*{
+			margin: 0;
+			padding: 0;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="cas" width="500" height="500"></canvas>
+</body>
+<script type="text/javascript">
+	window.onload = function(){
+		var a = document.getElementById('cas');
+		var b = a.getContext('2d');
+
+		b.beginPath();
+		b.strokeStyle = 'red';
+		b.arc(100,100,50,0,Math.PI/2,true);
+		b.closePath();
+		b.stroke();
+
+	}
+
+</script>
+</html>

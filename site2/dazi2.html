@@ -1,0 +1,54 @@
+<html><head><title>Type Write</title><style type="text/css">a{text-decoration:none}</style></head><body>  
+<div id="newsticker">
+  <span id="tickertitle"></span>
+  <a id="typewriter" href="#"></a>
+</div>  
+</body>  
+</html>  
+<script type="text/javascript">  
+
+var current = 0  
+var x = 0  
+var speed = 70  
+var speed2 = 2000  
+function initArray(n) {  
+  this.length = n;  
+  for (var i =1; i <= n; i++) {  
+    this[i] = ' '  
+  }  
+}  
+typ = new initArray(16);  
+typ[0]="406:red:Texas last in US Gov State Governors Websites (June 2008)";  
+typ[1]="409:red:The Insolvency Service last in UK Central Government (June 2008)";  
+typ[2]="384:green:Federated States of Micronesia 1st in US Gov State and Territorial Government Websites (April 2008)";  
+typ[3]="413:green:U.S. Immigration and Customs Enforcement highest climber in US Gov Federal Agencies  (up 188) - June 2008";  
+typ[4]="371:green:Iowa 1st in US Gov State Governors Websites (April 2008)";  
+typ[5]="373:green:Directgov Jobs and Skills 1st in UK Central Government (April 2008)";  
+typ[6]="379:red:Birmingham last in UK Local Government (April 2008)";  
+typ[7]="406:green:Utah highest climber in US Gov State Governors Websites (up 16) - June 2008";  
+typ[8]="380:red:Kent Police greatest faller in Police Forces (down 31) - April 2008";  
+function typewrite() {  
+  var m = typ[current];  
+  document.getElementById("typewriter").href = '/survey/report.html?rt=' + m.substring(0,m.indexOf(':'));  
+  m = m.substring(m.indexOf(':') + 1);  
+  document.getElementById("typewriter").style.color = m.substring(0,m.indexOf(':'));  
+  m = m.substring(m.indexOf(':') + 1);  
+  m = m.replace("&","and");  
+  document.getElementById("typewriter").innerHTML = m.substring(0, x++) + "_";  
+    
+  if (x == m.length + 1) {  
+    x = 0  
+    current++  
+    if (current > typ.length - 1) {  
+      current = 0  
+    }  
+    setTimeout("typewrite()", speed2)  
+    }  
+  else {  
+    setTimeout("typewrite()", speed)  
+  }  
+}  
+//document.getElementById("tickertitle").innerHTML = "Latest: ";  
+/*document.getElementById("smHeadlines").style.padding = "10px";*/  
+typewrite()  
+</script> 

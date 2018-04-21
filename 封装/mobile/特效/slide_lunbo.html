@@ -1,0 +1,198 @@
+<html>
+<head>
+	<title></title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+	<style type="text/css">
+		*{
+			margin: 0;
+			padding: 0;
+			list-style: none;
+		}
+
+		#wrap{
+			position: relative;
+			overflow: hidden;
+			height: 100px;
+		}
+
+		.ul_list{
+			position: absolute;
+			left:0;
+			top:0;
+			width: 960px;
+			height: 100px;
+			-webkit-transition:left 500ms linear;
+		}
+
+		.ul_list li{
+			width: 320px;
+			height: 100px;
+			color: #fff;
+			text-align: center;
+			line-height: 100px;
+			font-size: 30px;
+			float: left;
+		}
+
+		.ul_list li.one{
+			background: red;
+		}
+
+		.ul_list li.two{
+			background: green;
+		}
+
+		.ul_list li.three{
+			background: yellow;
+		}
+
+		.pointWrap{
+			width: 200px;
+			position: absolute;
+			left:50%;
+			bottom: 0;
+			margin-left: -100px;
+			text-align: center;
+		}
+
+		.pointWrap .point{
+			display: inline-block;
+			width: 10px;
+			height: 10px;
+			border-radius: 5px;
+			background-color: blue;
+			margin: 0 10px;
+			text-align: center;	
+		}
+
+		.pointWrap .current{
+			background: white
+		}
+
+	</style>
+</head>
+<body>
+	<div id="wrap">
+		<ul class="ul_list" id="ul_list">
+			<li class="one">1</li>
+			<li class="two">2</li>
+			<li class="three">3</li>
+		</ul>
+		<div class="pointWrap" id="pointWrap">
+			<span class="point current"></span>
+			<span class="point"></span>
+			<span class="point"></span>
+		</div>
+	</div>
+</body>
+<script type="text/javascript">
+	var oWrap = document.getElementById("wrap");
+	var oUlList = document.getElementById("ul_list");
+	var oLi = oUlList.getElementsByTagName("li");
+	var oLiLen = oLi.length;
+	var oLiWidth = oLi[0].offsetWidth;
+	var oWrapWidth = oWrap.offsetWidth;
+	var timer = null;
+	var num = 0;
+	var current = 0;
+	var bannerLock = false;
+	
+
+    function preventDefault(e){
+        if(e.preventDefault){
+            e.preventDefault();
+        }else{
+            e.returnValue = false;
+        }
+    }
+
+    function forEach(arr, fn){
+        var len = arr.length;
+        for(var i=0;i<len;++i){
+            fn(arr[i], i);
+        }
+    }
+
+    function on(el, events, fn, capture){
+        forEach(events.split(' '), function(ev){
+            if(el.addEventListener){
+                el.addEventListener(ev, fn, Boolean(capture));
+            }else{
+                el.attachEvent('on' + ev, fn);
+            }
+        });
+    }
+
+    function off(el, events, fn, capture){
+        forEach(events.split(' '), function(ev){
+            if(el.removeEventListener){
+                el.removeEventListener(ev, fn, Boolean(capture));
+            }else{
+                el.detachEvent('on' + ev, fn);
+            }
+        });
+    }
+
+    function getX(e){
+        return e.touches ? e.touches[0].clientX : e.clientX;
+    }
+
+   	var startX;
+    var moveX;
+
+    function bindMove(e){	
+    	preventDefault(e);
+    	moveX = null;
+    	moveX = getX(e);
+    	//console.log("moveX" + moveX)
+    }
+
+    function bindEnd(e){
+    	preventDefault(e);
+    	if(parseInt(moveX+20)<parseInt(startX)){
+    		if(num<oLiLen-1){
+	    		num++;
+	    		console.log('向左');
+	    		oUlList.style.left = -oLiWidth*num + 'px';
+    		}
+    	}else if(parseInt(moveX-20)>parseInt(startX)){
+    		if(num>0){
+    			num--;
+    			console.log('向右')
+    			oUlList.style.left = -oLiWidth*num + 'px';
+    		}
+    	}
+    	startX = null;
+    	moveX = null;
+    	off(oUlList,"touchmove mousemove",bindMove);
+    	off(oUlList,"touchend mouseup",bindEnd);
+    }
+
+   	function bindStart(e){
+   		preventDefault(e);
+   		startX = null;
+        startX = getX(e);
+        //console.log("startX" + startX)
+        on(oUlList,"touchmove mousemove",bindMove);
+        on(oUlList,"touchend mouseup",bindEnd);
+    }
+
+    on(oUlList,"touchstart mousedown",bindStart);
+
+    function autoMove(){
+    	if(num == oLiLen-1){
+    		num = 0;
+    	}else{
+    		num++;
+    	}
+    	
+    	oUlList.style.left = -oLiWidth*num + 'px';
+    }
+
+    timer = setInterval(autoMove,3000)
+		
+	
+
+</script>
+</html>

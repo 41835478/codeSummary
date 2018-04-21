@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+	<style>
+		*{
+			margin: 0;
+			padding: 0;
+		}
+		
+		.game-records{
+		    height: 90px;
+		    position: relative;
+		    background: #fff;
+		    overflow: hidden;
+		    border: 1px solid #ececec;
+		}
+		.game-records-header{
+		    position: absolute;
+		    left:0;
+		    top:0;
+		    height: 100%;
+		    width: 32px;
+		    background: #ff952f;
+		    text-align: center;
+		    font-size: 16px;
+		    color: #fff;
+		}
+		.game-records-content{
+		    position: absolute;
+		    top: 0;
+		    left: 32px;
+		    right: 0;
+		    height: 100%;
+		    white-space: nowrap;
+		}
+		.record-item{
+		    display: inline-block;
+		    vertical-align: top;
+		    margin-top: 8px;
+		    text-align: center;
+		    width: 80px;
+		}
+		.record-item-img{
+		    width: 55px;
+		    height: 55px;
+		}
+		.record-item-title{
+		    color: #777;
+		    display: block;
+		    margin-top: 4px;
+		    text-overflow: ellipsis;
+		    overflow: hidden;
+		}
+
+	</style>
+</head>
+<body>
+	<div id="game-records" class="game-records">
+		<div id="game-records-content" class="game-records-content"></div>
+		<div class="game-records-header"><br />我<br />玩<br />过<br />的</div>
+	</div>
+	<script id="temp-record" type="text/template"><a class="record-item" target=_blank href=##game_url##><img class="record-item-img" src="##img##" /><span class="record-item-title">##name##</span></a></script>
+</body>
+<script>
+		var win = window;
+		var doc = document;
+
+		function isArrayLike(arr){
+		    if(arr && 'length' in arr){
+		        var len = arr.length;
+		        if(typeof len === 'number' &&
+		                (
+		                    len === 0 ||
+		                    (0 in arr && len-1 in arr)
+		                )
+		            ){
+		            return true;
+		        }
+		    }
+		    return false;
+		}
+
+		function forEach(arr, fn) {
+		    var i;
+		    if (arr && typeof arr === 'object') {
+		        if (isArrayLike(arr)) {
+		            var len = arr.length;
+		            for (i = 0; i < len; ++i) {
+		                if (fn(arr[i], i) === false) {
+		                    break;
+		                }
+		            }
+		        }else{
+		            var hasOwnProperty = 'hasOwnProperty' in arr;
+		            for (i in arr) {
+		                if (!hasOwnProperty || arr.hasOwnProperty(i)) {
+		                    if (fn(arr[i], i) === false) {
+		                        break;
+		                    }
+		                }
+		            }
+		        }
+		    }
+		}
+
+		var htmlEntities = {
+		    '&': '&amp;',
+		    '"': '&quot;',
+		    "'": '&apos;',
+		    '<': '&lt;',
+		    '>': '&gt;'
+		};
+		var htmlEntityReg = /[&"'<>]/g;
+		function htmlEntityReplace(match){
+		    return htmlEntities[match];
+		}
+		function htmlEscape(html){
+		    return html.replace(htmlEntityReg, htmlEntityReplace);
+		}
+		function template(str, obj){
+		    return str.replace(/##([^#]+)##/g, function(match, key){
+		        if(obj.hasOwnProperty(key)){
+		            return htmlEscape(String(obj[key]));
+		        }else{
+		            return '';
+		        }
+		    });
+		}
+
+		function getX(e){
+		    return e.touches ? e.touches[0].clientX : e.clientX;
+		}
+
+		function getById(id){
+	        return doc.getElementById(id);
+	    }
+
+	    function preventDefault(e){
+		    if(e.preventDefault){
+		        e.preventDefault();
+		    }else{
+		        e.returnValue = false;
+		    }
+		}
+		function stopPropagation(e){
+		    if(e.stopPropagation){
+		        e.stopPropagation();
+		    }else{
+		        e.cancelBubble = false;
+		    }
+		}
+
+	    function on(el, events, fn, capture){
+		    forEach(events.split(' '), function(ev){
+		        if(el.addEventListener){
+		            el.addEventListener(ev, fn, Boolean(capture));
+		        }else{
+		            el.attachEvent('on' + ev, fn);
+		        }
+		    });
+		}
+
+		function off(el, events, fn, capture){
+		    forEach(events.split(' '), function(ev){
+		        if(el.removeEventListener){
+		            el.removeEventListener(ev, fn, Boolean(capture));
+		        }else{
+		            el.detachEvent('on' + ev, fn);
+		        }
+		    });
+		}
+
+	    var records = [
+	    	{
+	    		game_url: "http://www.baidu.com",
+	    		img: "http://www.liebao.cn/game/img/xiong.png",
+	    		intr: "反向跑酷玩过吗！",
+	    		name: "熊出没"
+	    	},{
+	    		game_url: "http://www.baidu.com",
+	    		img: "http://www.liebao.cn/game/img/xiong.png",
+	    		intr: "反向跑酷玩过吗！",
+	    		name: "熊出没"
+	    	},{
+	    		game_url: "http://www.baidu.com",
+	    		img: "http://www.liebao.cn/game/img/xiong.png",
+	    		intr: "反向跑酷玩过吗！",
+	    		name: "熊出没"
+	    	},{
+	    		game_url: "http://www.baidu.com",
+	    		img: "http://www.liebao.cn/game/img/xiong.png",
+	    		intr: "反向跑酷玩过吗！",
+	    		name: "熊出没"
+	    	},
+	    	{game_url: "http://www.liebao.cn/game",
+	    		img: "http://www.liebao.cn/game/img/paopaow.png",
+	    		intr: "经典泡泡龙游戏，快来玩玩吧！",
+	    		name: "泡泡龙"
+	    	}
+	    ];
+
+        (function(recordTemplate){
+            var $gameRecords = getById('game-records');
+            var $gameRecordsContent = getById('game-records-content');
+            var $t = doc.createElement('div');
+            var $gameMap = Object.create(null);
+            
+            forEach(records, function(gameItem){
+                
+                $t.innerHTML = template(recordTemplate, gameItem);
+                var $game = $t.childNodes[0];
+                $gameRecordsContent.insertBefore($game, $gameRecordsContent.childNodes[0]);
+            });
+
+            
+            var startLeft = $gameRecordsContent.left = $gameRecordsContent.offsetLeft;
+            on($gameRecordsContent, 'click', function(e){
+                preventDefault(e);
+                stopPropagation(e);
+            });
+            on($gameRecordsContent, 'touchstart mousedown', function(e){
+                preventDefault(e);
+                var holderWidth = $gameRecords.clientWidth;
+                var left = $gameRecordsContent.left;
+                var nowLeft = left;
+                var width = $gameRecordsContent.children.length * 80;
+                var eventUp = 'touchend';
+                var eventMove = 'touchmove';
+                var startX = getX(e);
+                if(e.type === 'mousedown'){
+                    if(('which' in e ? e.which : e.button) !== 1){
+                        return;
+                    }else{
+                        eventUp = 'mouseup';
+                        eventMove = 'mousemove';
+                    }
+                }
+                var click = true;
+                function onMove(e){
+                    preventDefault(e);
+                    var nowX = getX(e);
+                    var moved = nowX - startX;
+                    if(Math.abs(moved) > 5){
+                        click = false;
+                    }
+                    nowLeft = $gameRecordsContent.left = Math.min(Math.max(left + moved, holderWidth - width), startLeft);
+                    $gameRecordsContent.style.left = nowLeft + 'px';
+                }
+                on(doc, eventMove, onMove);
+                on(doc, eventUp, function o(e){
+                    preventDefault(e);
+                    off(doc, eventMove, onMove);
+                    off(doc, eventUp, o);
+                    if(click){
+                    	function onClick(e){
+                    		var target = e.target || e.srcElement;
+                    		return target.parentNode;
+                    	}
+                        var target = onClick(e);
+                        var href;
+                        if(target && (href = target.href)){
+                        	setTimeout(function(){
+                            	location.href = href;
+                        	},300)
+                        }
+                    }
+
+                });
+            });
+        })(getById('temp-record').innerHTML);
+
+</script>
+</html>

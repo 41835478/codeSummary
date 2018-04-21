@@ -1,0 +1,93 @@
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		*{
+			margin: 0;
+			padding: 0;
+		}
+
+		#wrap{
+			width: 1000px;
+			margin: 0 auto;
+			position: relative;
+			font-size: 23px;
+		}
+
+		.rect{
+			position: absolute;
+			width: 23px;
+			height: 23px;
+			background: #ccc;
+			left:0;
+			top:0;
+			z-index: 100;
+			-webkit-animation: loop 2s linear infinite;
+		}
+
+		.readMe{
+			float: left;
+			line-height: 23px;
+			visibility: hidden;
+		}
+
+		@-webkit-keyframes loop{
+			0%{
+				opacity: 1;
+			}
+			100%{
+				opacity: 1;
+			}
+		}
+
+
+	</style>
+</head>
+<body>
+	<div id="wrap">
+		<p class="readMe">这是一段标题</p></br>
+		<p class="readMe">这是一段文字，这是一段文字，这是一段文字，这是一段文字</p></br>
+		<p class="readMe">这是一段文字，这是一段文字，这是一段文字，这是一段文字，这是一段文字，这是一段文字</p></br>
+		<p class="readMe">这是一段文字，这是一段文字，这是一段文字，这是一段文字</p></br>
+		<p class="readMe">这是一段文字，这是一段文字，这是一段文字，这是一段文字，这是一段文字，这是一段文字</p></br>
+		<p class="readMe">这是一段文字，这是一段文字，这是一段文字，这是一段文字</p></br>
+		<p class="readMe">这是一段文字，这是一段文字，这是一段文字，这是一段文字，这是一段文字，这是一段文字</p></br>
+		<span class="rect" id="rect"></span>
+	</div>
+</body>
+<script type="text/javascript">
+	var oRect = document.getElementById('rect');
+	var oReadMeArr = document.getElementsByClassName('readMe');
+	
+	var timer = null;
+	var arr = [];
+	var n = 0;
+
+	for(var i=0;i<oReadMeArr.length;i++){
+		arr.push(oReadMeArr[i].offsetWidth);
+	}
+
+	function move(){
+		if(oRect.offsetLeft == arr[n]){
+			n++;
+			if(n>=arr.length){
+				clearInterval(timer);
+			}else{
+				document.getElementsByTagName('p')[n-1].style.visibility = 'visible';
+				oRect.style.top = oRect.offsetTop + 26 + 'px';
+				oRect.style.left =  0 + 'px';
+			}
+		}else{
+			// oRect.style.width = arr[n] + 'px';
+			oRect.style.left = oRect.offsetLeft + 1 +'px';
+		}
+	}
+
+	timer = setInterval(move,5);
+	
+	
+
+	
+
+</script>
+</html>

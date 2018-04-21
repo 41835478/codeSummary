@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+	<title></title>
+	<style>
+		*{
+			margin: 0;
+			padding: 0;
+		}
+		
+		.demo{
+			width:100%;
+			height: 50px;
+			background-color: red;
+		}
+
+		.item{
+			width: 100%;
+			height: 150px;
+			background-color: #eee;
+			margin: 10px 0;
+		}
+
+	</style>
+	<script src="js/jquery.js"></script>
+</head>
+<body>
+	
+	<div class="demo"></div>
+	<div class="item"></div>
+	<div class="item"></div>
+	<div class="item"></div>
+	<div class="item"></div>
+	<div class="item"></div>
+	<div class="item"></div>
+
+
+	<script>
+
+		var ss = document.createElement('div');
+		ss.style.width = '100px';
+		ss.style.height = '100px';
+		ss.style.backgroundColor = '#ccc';
+		ss.style.position = 'absolute';
+		ss.style.zIndex = 100;
+		ss.style.top = 0;
+		ss.style.left = 0;
+		//document.body.appendChild(ss);
+
+		function mygetnativeevent(event) {
+			while (event && typeof event.originalEvent !== "undefined") {
+				event = event.originalEvent;
+			}
+			return event;
+		}
+
+		//icon_arrow_new 默认是向上的
+
+		var pullrefresh = {
+			init: function () {
+				var pos = {};
+				var status = false;
+				var divobj = null;
+				var contentobj = null;
+				var reloadflag = false;
+				var recordFlag = false;
+				var pullheight;
+				$('body').on('touchstart', function (e) {
+					e = mygetnativeevent(e);
+					pos.startx = e.touches[0].pageX;
+					pos.starty = e.touches[0].pageY;
+				})
+				.on('touchmove', function (e) {
+					e = mygetnativeevent(e);
+					pos.curposx = e.touches[0].pageX;
+					pos.curposy = e.touches[0].pageY;
+					//console.log(pos.curposy - pos.starty)//正值为往下 负值为往上
+					if (pos.curposy - pos.starty < 0 && !status) {
+						return;
+					}
+					if (!status && $(window).scrollTop() <= 0) {//当往下拉的时候 最初Move的状态
+
+						status = true;
+						divobj = document.createElement('div');//父容器
+						divobj = $(divobj);
+						divobj.css({ 'position': 'relative'});
+						$('body').prepend(divobj);
+						contentobj = document.createElement('div');//子容器
+						contentobj = $(contentobj);
+						contentobj.css({ 'position': 'absolute', 'height': '30px', 'line-height':'30px' , 'width':'100%','text-align':'center'});
+						contentobj.html('<img width=29 height=29 src="img/icon_arrow_new.png" style="vertical-align:middle;margin-right:5px;-moz-transform:rotate(180deg);-webkit-transform:rotate(180deg);-o-transform:rotate(180deg);transform:rotate(180deg);"><span id="refreshtxt" style="color:#333;">Swipe down to refresh</span>');
+						contentobj.find('img').css({ '-webkit-transition': 'all 0.5s ease-in-out' });//图标为向下
+						divobj.prepend(contentobj);
+						pos.topx = pos.curposx;
+						pos.topy = pos.curposy;
+					}
+					if (!status) {
+						return;
+					}
+					if (status == true) {
+						pullheight = pos.curposy - pos.topy;//下拉的距离
+
+						if (pullheight >= 0 && pullheight < 150) {
+
+							if(recordFlag){
+								$('.demo').animate({ 'marginTop': '0' }, 100, 'linear');
+								recordFlag = false;
+							}
+
+							divobj.css({ 'height': pullheight / 2 + 'px' });//插入父容器的高度
+							
+							contentobj.css({ 'top': (-35 + pullheight / 2) + 'px' });//设置插入子容器的top值 30为父容器的高度
+
+							if (reloadflag) {//如果人为向上滑动，图标会再变为向下的图标
+								contentobj.find('img').css({ '-webkit-transform': 'rotate(180deg)', '-moz-transform': 'rotate(180deg)', '-o-transform': 'rotate(180deg)', 'transform': 'rotate(180deg)' });
+								contentobj.find('#refreshtxt').html('Swipe down to refresh');
+							}
+							reloadflag = false;
+						} else if (pullheight >= 150) {
+							recordFlag = true;
+
+							divobj.css({ 'height': pullheight / 2 + 'px' });
+
+							if (!reloadflag) {//当大于150后，图标翻转为向上
+								contentobj.find('img').css({ '-webkit-transform': 'rotate(360deg)', '-moz-transform': 'rotate(360deg)', '-o-transform': 'rotate(360deg)', 'transform': 'rotate(360deg)' });
+								contentobj.find('#refreshtxt').html('Release to refresh');
+							}
+							reloadflag = true;
+						}
+					}
+					e.preventDefault();
+				})
+				.on('touchend', function (e) {
+					if (status == true) {
+						if (reloadflag) {//松手后显示refresh
+							contentobj.html('<img width=24 height=24 src="img/icon_arrow_new.png" style="vertical-align:middle;">&nbsp;Refreshing...');
+							
+							contentobj.animate({ 'top': (90 / 2 - 15) + 'px' }, 618, 'linear');
+					
+
+							divobj.animate({ 'height': '90' }, 700, 'linear', function () {
+								location.reload();
+							});
+							
+							return;
+						}
+					}
+					divobj.remove();
+					divobj = null;
+					status = false;
+					pos = {};
+				});
+			}
+		};
+
+		pullrefresh.init();
+	</script>
+</body>
+</html>

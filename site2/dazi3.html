@@ -1,0 +1,54 @@
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		#wrap{
+			width: 600px;
+			margin: 0 auto;
+		}
+	</style>
+</head>
+<body>
+
+	<div id="wrap">
+		<!-- <p id="typewriter_0"></p>
+		<p id="typewriter_1"></p>
+		<p id="typewriter_2"></p> -->
+	</div>
+	<script type="text/javascript">
+/*
+	添加段落的方法：
+	1，加str
+	2，加数组
+*/
+
+		var str1 = '这是一段标题';
+		var str2 = '这是一段文字，这是一段文字，这是一段文字，这是一段文字';
+		var str3 = '这是一段文字，这是一段文字';
+		var x = 0;
+		var ID = 'typewriter';
+		var oWrap = document.getElementById('wrap');
+		var arr = [str1,str2,str3];
+		var arrLen = [];
+
+		for(var i=0;i<arr.length;i++){
+			var pop = arr[i].length;
+			arrLen.push(pop);
+			var createP = document.createElement('p');
+			createP.id = ID + '_' +[i];
+			oWrap.appendChild(createP);
+		}
+		
+		var k = 0;
+		setInterval(function(){
+			if(x == arrLen[k]){
+				x = 0;
+				k++;
+			}
+			document.getElementById(ID+'_'+k).innerHTML = arr[k].substring(0, ++x);
+		},100)
+		
+
+	</script>
+</body>
+</html>

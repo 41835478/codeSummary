@@ -1,0 +1,76 @@
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+		*{
+			margin: 0;
+			padding: 0;
+		}
+
+
+		@-webkit-keyframes drop{
+			0%{
+				-webkit-transform:translateZ(600px);
+			}
+
+			100%{
+				-webkit-transform:translateZ(0px);
+			}
+		}
+
+		#wrap{
+			width: 300px;
+			height: 300px;
+			border: 1px solid black;
+			margin: 0 auto;
+			-webkit-transform-style:preserve-3d;
+			-webkit-transform:perspective(500px); 
+		}
+
+		.rect{
+			width: 100px;
+			height: 100px;
+			float: left;
+			-webkit-animation: drop 2s ease-out;
+		}
+	</style>
+</head>
+<body>
+
+	<div id="wrap">
+
+	</div>
+
+	<script type="text/javascript">
+		
+		var oWrap = document.getElementById('wrap');
+		
+
+		var arrDiv = [
+			[0,0,1],
+			[0,1,0],
+			[1,0,0]
+		];
+
+		function draw(ele){
+			var div = document.createElement('div');
+			var rad = ((Math.random()+0.3)*4).toFixed(2)
+			div.style.webkitAnimation = 'drop ' + rad + 's ease-out';
+			div.className = 'rect';
+			if(ele == 0){
+				div.style.backgroundColor = '#eee';
+			}else if(ele == 1){
+				div.style.backgroundColor = '#ccc';
+			}			
+			oWrap.appendChild(div);
+		}
+
+		for(var i=0;i<arrDiv.length;i++){
+			for(var j=0;j<arrDiv[i].length;j++){
+				draw(arrDiv[i][j]);
+			}
+		}
+
+	</script>
+</body>
+</html>

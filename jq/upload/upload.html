@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+	<title></title>
+	<link href="css/upload.css" rel="stylesheet">
+	<script src="js/jquery.js"></script>
+	<script src="js/jquery_upload.js"></script>
+</head>
+<body>
+	<div id="deleteupload">
+		
+	</div>
+
+	
+
+	<script>
+	$(document).ready(function()
+	{
+		
+		$("#deleteupload").uploadFile({
+			url: "upload.php",
+			dragDrop: true,
+			fileName: "myfile",
+			returnType: "json",
+			showDelete: true,
+			showDownload:true,
+			statusBarWidth:600,
+			dragdropWidth:600,
+			deleteCallback: function (data, pd) {
+			    for (var i = 0; i < data.length; i++) {
+			        $.post("delete.php", {op: "delete",name: data[i]},
+			            function (resp,textStatus, jqXHR) {
+			                //Show Message	
+			                alert("File Deleted");
+			            });
+			    }
+			    pd.statusbar.hide(); //You choice.
+
+			},
+			downloadCallback:function(filename,pd)
+				{
+					location.href="download.php?filename="+filename;
+				}
+		}); 
+	});
+	</script>
+</body>
+</html>
